@@ -25,6 +25,7 @@ mkdir -p "$TMP_DIR"
 
 cp -r "$MODULE_DIR"/* "$TMP_DIR/"
 cp -r "$QIUHE_DIR/lib" "$TMP_DIR/"
+cp -r "$QIUHE_DIR/web" "$TMP_DIR/"
 
 # 写入 README 到模块中
 cat > "$TMP_DIR/README.md" << 'MODULE_README'
@@ -67,6 +68,7 @@ cd "$QIUHE_DIR"
 zip -r "$SCRIPT_ZIP" \
     qiuhe.sh \
     lib/ \
+    web/ \
     README.md \
     1>/dev/null
 cd "$SCRIPT_DIR"

@@ -16,6 +16,7 @@
 #   sh qiuhe.sh export <别名> --output <路径> [--pass <密码>]
 #   sh qiuhe.sh export --all --output <目录> [--pass <密码>]
 #   sh qiuhe.sh import <文件> [--pass <密码>]
+#   sh qiuhe.sh web [端口]          # 启动 Web UI (默认端口 8848)
 #   sh qiuhe.sh help               # 帮助信息
 #===============================================================================
 
@@ -69,6 +70,7 @@ show_help() {
     echo "  export   <别名> --output <路径> [--pass <密码>]  导出账号存档"
     echo "  export   --all --output <目录> [--pass <密码>]   导出全部账号"
     echo "  import   <文件> [--pass <密码>]                 导入账号存档"
+    echo "  web      [端口]                         启动 Web UI 管理界面"
     echo "  help                        显示此帮助信息"
     echo ""
     echo "示例:"
@@ -290,14 +292,20 @@ show_menu() {
     echo "  7) 导出账号"
     echo "  8) 导入账号"
     echo "  9) 查看快照"
+    echo "  W) 启动 Web UI"
     echo "  0) 退出"
     echo ""
 
-    printf "  输入数字 [0-9]: "
+    printf "  输入 [0-9/W]: "
     read -r _choice
 
     case "$_choice" in
-        0) log_info "再见!"; exit 0 ;;
+        0) log_info "再见!"; exit 0 ;; 
+        w|W)
+            PORT="${1:-8848}"
+            log_info "正在启动 Web UI..."
+            exec "$QIUHE_HOME/web/server.sh" "$PORT"
+            ;;
         1)
             detect_games
             ;;
@@ -427,6 +435,10 @@ main() {
             ;;
         import)
             import_account "$1" "$@"
+            ;;
+        web)
+            PORT="${1:-8848}"
+            exec "$QIUHE_HOME/web/server.sh" "$PORT"
             ;;
         *)
             log_err "未知命令: $_cmd"

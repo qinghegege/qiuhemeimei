@@ -31,6 +31,14 @@ cp -f "$MODDIR/../lib/account.sh" "$QIUHE_DIR/lib/" 2>/dev/null || true
 cp -f "$MODDIR/../lib/detect.sh" "$QIUHE_DIR/lib/" 2>/dev/null || true
 cp -f "$MODDIR/../lib/switch.sh" "$QIUHE_DIR/lib/" 2>/dev/null || true
 
+ui_print "- 复制 Web UI 文件..."
+mkdir -p "$QIUHE_DIR/web"
+cp -f "$MODDIR/../web/server.sh" "$QIUHE_DIR/web/" 2>/dev/null || true
+cp -f "$MODDIR/../web/api.sh" "$QIUHE_DIR/web/" 2>/dev/null || true
+cp -f "$MODDIR/../web/index.html" "$QIUHE_DIR/web/" 2>/dev/null || true
+chmod 755 "$QIUHE_DIR/web/api.sh"
+chmod 755 "$QIUHE_DIR/web/server.sh"
+
 ui_print "- 创建全局命令..."
 mkdir -p "$MODDIR/system/bin"
 cat > "$MODDIR/system/bin/qiuhe" << 'SCRIPT'
@@ -75,6 +83,7 @@ main() {
             echo "  export   <别名> --output <路径> [--pass <密码>]"
             echo "  export   --all --output <目录> [--pass <密码>]"
             echo "  import   <文件> [--pass <密码>]"
+            echo "  web      [端口]          启动 Web UI"
             echo "  help                     帮助"
             ;;
         detect) detect_games ;;
@@ -89,6 +98,7 @@ main() {
             if [ "$1" = "--all" ]; then shift; export_all "$@"
             else export_account "$1" "$@"; fi ;;
         import) import_account "$1" "$@" ;;
+        web) exec /data/adb/qiuhe/web/server.sh "${1:-8848}" ;;
         *) echo "未知命令: $_cmd, 使用 'qiuhe help' 查看帮助"; return 1 ;;
     esac
 }
