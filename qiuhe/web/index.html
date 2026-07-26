@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>qiuhe - 腾讯手游账号切换器</title>
+<title>清荷 - 腾讯手游账号切换器</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f0f; color: #e0e0e0; min-height: 100vh; }
@@ -50,19 +50,43 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .acct-meta { font-size: 11px; color: #777; margin-top: 2px; }
 .acct-actions { display: flex; gap: 6px; }
 .loading { text-align: center; padding: 20px; color: #888; }
+/* AI 助手样式 */
+.chat-container { display: flex; flex-direction: column; height: calc(100vh - 200px); min-height: 400px; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 8px 0; }
+.chat-msg { margin-bottom: 12px; display: flex; flex-direction: column; }
+.chat-msg.user { align-items: flex-end; }
+.chat-msg.assistant { align-items: flex-start; }
+.chat-bubble { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; word-break: break-word; }
+.chat-bubble.user { background: #4a6cf7; color: #fff; border-bottom-right-radius: 4px; }
+.chat-bubble.assistant { background: #2a2a3e; color: #ddd; border-bottom-left-radius: 4px; }
+.chat-bubble.error { background: #7f1d1d; color: #fca5a5; }
+.chat-time { font-size: 10px; color: #666; margin-top: 3px; padding: 0 4px; }
+.chat-input-area { display: flex; gap: 8px; padding: 10px 0; border-top: 1px solid #2a2a3e; }
+.chat-input-area input { flex: 1; padding: 10px 14px; border: 1px solid #2a2a3e; border-radius: 20px; background: #0f0f0f; color: #fff; font-size: 14px; outline: none; }
+.chat-input-area input:focus { border-color: #4a6cf7; }
+.chat-input-area .btn-send { padding: 8px 18px; border-radius: 20px; }
+.chat-quick-actions { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 0; }
+.chat-quick-actions .btn { font-size: 11px; padding: 5px 10px; border-radius: 12px; }
+.chat-settings { margin-bottom: 10px; padding: 8px 12px; background: #1a1a2e; border-radius: 10px; display: none; }
+.chat-settings.show { display: block; }
+.chat-settings input { width: 100%; padding: 8px 10px; margin: 6px 0; border: 1px solid #2a2a3e; border-radius: 6px; background: #0f0f0f; color: #fff; font-size: 13px; outline: none; }
+.chat-settings input:focus { border-color: #4a6cf7; }
+.chat-cmd-btn { opacity: 0.7; transition: opacity 0.2s; }
+.chat-cmd-btn:active { opacity: 1; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>qiuhe</h1>
-  <p>腾讯手游账号本地切换器</p>
+  <h1>清荷</h1>
+  <p>腾讯手游账号本地切换器 · DeepSeek AI</p>
 </div>
 
 <div class="container">
   <div class="tab-bar">
     <button class="tab active" onclick="switchTab('games')">游戏列表</button>
     <button class="tab" onclick="switchTab('accounts')">账号管理</button>
+    <button class="tab" onclick="switchTab('ai')">AI 助手</button>
   </div>
 
   <div id="tab-games">
@@ -79,6 +103,43 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
     <div class="section">
       <div class="section-title">备份列表</div>
       <div id="accounts-list"><div class="loading">加载中... <span class="spinner"></span></div></div>
+    </div>
+  </div>
+
+  <div id="tab-ai" style="display:none">
+    <div class="chat-settings" id="ai-settings">
+      <div style="font-size:13px;color:#aaa;margin-bottom:4px">配置 DeepSeek API Key</div>
+      <input type="password" id="ai-api-key" placeholder="sk-xxxxxxxxxxxxxxxx">
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <button class="btn btn-primary btn-sm" onclick="saveAiConfig()">保存</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAiConfig()">清除</button>
+      </div>
+      <div style="font-size:11px;color:#666;margin-top:4px">
+        获取 Key: <a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:#4a6cf7">platform.deepseek.com</a>
+      </div>
+    </div>
+    <div class="chat-quick-actions">
+      <button class="btn btn-outline btn-sm chat-cmd-btn" onclick="sendQuickCmd('列出所有已备份的账号')">列出账号</button>
+      <button class="btn btn-outline btn-sm chat-cmd-btn" onclick="sendQuickCmd('检测已安装的游戏')">检测游戏</button>
+      <button class="btn btn-outline btn-sm chat-cmd-btn" onclick="sendQuickCmd('切换账号到我的大号')">切号示例</button>
+      <button class="btn btn-outline btn-sm chat-cmd-btn" onclick="document.getElementById('ai-settings').classList.toggle('show')">设置</button>
+    </div>
+    <div class="chat-container">
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-msg assistant">
+          <div class="chat-bubble assistant">
+            你好，我是 清荷 AI 助手。<br><br>
+            配置 DeepSeek API Key 后，可以直接用自然语言管理账号，例如：<br>
+            「切换到王者荣耀大号」<br>
+            「备份和平精英当前账号为小号」<br><br>
+            点击下方「设置」按钮配置 API Key。
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="输入消息，例如：切换到王者荣耀大号" onkeydown="if(event.key==='Enter')sendMessage()">
+        <button class="btn btn-primary btn-send" onclick="sendMessage()">发送</button>
+      </div>
     </div>
   </div>
 </div>
@@ -112,7 +173,9 @@ function switchTab(tab) {
   event.target.classList.add('active');
   document.getElementById('tab-games').style.display = tab === 'games' ? '' : 'none';
   document.getElementById('tab-accounts').style.display = tab === 'accounts' ? '' : 'none';
+  document.getElementById('tab-ai').style.display = tab === 'ai' ? '' : 'none';
   if (tab === 'accounts') refreshAccounts();
+  if (tab === 'ai') initAiTab();
 }
 
 async function refreshGames() {
@@ -255,6 +318,170 @@ function doDelete(alias) {
     if (d.ok) { toast('已删除: ' + alias, 'success'); refreshAccounts(); }
     else toast(d.error || '删除失败', 'error');
   }).catch(() => toast('请求失败', 'error'));
+}
+
+// ---------- AI 助手 ----------
+
+var aiConfigured = false;
+
+function initAiTab() {
+  api('ai/config', { action: 'get' }).then(d => {
+    if (d.configured) {
+      aiConfigured = true;
+      document.getElementById('ai-settings').classList.remove('show');
+    } else {
+      aiConfigured = false;
+      document.getElementById('ai-settings').classList.add('show');
+    }
+  }).catch(() => {});
+}
+
+function saveAiConfig() {
+  var key = document.getElementById('ai-api-key').value.trim();
+  if (!key) { toast('请输入 API Key', 'error'); return; }
+  api('ai/config', { action: 'set', key: key }).then(d => {
+    if (d.ok) {
+      aiConfigured = true;
+      document.getElementById('ai-settings').classList.remove('show');
+      toast('API Key 已保存', 'success');
+      addChatMsg('assistant', '配置成功。现在可以直接用自然语言管理账号了。');
+    } else {
+      toast(d.error || '保存失败', 'error');
+    }
+  }).catch(() => toast('请求失败', 'error'));
+}
+
+function deleteAiConfig() {
+  if (!confirm('确认清除 API Key 配置？')) return;
+  api('ai/config', { action: 'delete' }).then(d => {
+    aiConfigured = false;
+    document.getElementById('ai-api-key').value = '';
+    toast('配置已清除', 'success');
+  }).catch(() => toast('请求失败', 'error'));
+}
+
+function addChatMsg(role, content, isError) {
+  var msgs = document.getElementById('chat-messages');
+  var div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  var bubble = document.createElement('div');
+  bubble.className = 'chat-bubble ' + role + (isError ? ' error' : '');
+  bubble.innerHTML = content.replace(/\n/g, '<br>');
+  div.appendChild(bubble);
+  var time = document.createElement('div');
+  time.className = 'chat-time';
+  time.textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  div.appendChild(time);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  var msgs = document.getElementById('chat-messages');
+  var div = document.createElement('div');
+  div.className = 'chat-msg assistant';
+  div.id = 'typing-indicator';
+  div.innerHTML = '<div class="chat-bubble assistant"><span class="spinner"></span> 思考中...</div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideTyping() {
+  var el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function sendMessage() {
+  var input = document.getElementById('chat-input');
+  var msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  addChatMsg('user', msg);
+
+  if (!aiConfigured) {
+    addChatMsg('assistant', '请先点击「设置」配置 DeepSeek API Key。', true);
+    return;
+  }
+
+  showTyping();
+
+  api('ai/chat', { msg: msg }).then(d => {
+    hideTyping();
+    var reply = '';
+    if (d.error) {
+      if (d.error === 'api_key_not_configured') {
+        reply = '请先配置 DeepSeek API Key';
+        document.getElementById('ai-settings').classList.add('show');
+      } else {
+        reply = '错误: ' + d.error;
+      }
+      addChatMsg('assistant', reply, true);
+    } else if (d.choices && d.choices[0] && d.choices[0].message) {
+      reply = d.choices[0].message.content;
+      addChatMsg('assistant', reply);
+      tryParseCommand(reply);
+    } else if (d.choices && d.choices[0] && d.choices[0].delta) {
+      reply = d.choices[0].delta.content || JSON.stringify(d);
+      addChatMsg('assistant', reply);
+    } else {
+      addChatMsg('assistant', 'API 返回格式异常', true);
+    }
+  }).catch(e => {
+    hideTyping();
+    addChatMsg('assistant', '网络请求失败，请检查网络连接', true);
+  });
+}
+
+function sendQuickCmd(cmd) {
+  document.getElementById('chat-input').value = cmd;
+  sendMessage();
+}
+
+// 尝试从 AI 回复中提取 JSON 命令并执行
+function tryParseCommand(text) {
+  var match = text.match(/\{[^}]*"cmd"[^}]*\}/);
+  if (!match) return;
+
+  try {
+    var cmd = JSON.parse(match[0]);
+    if (!cmd.cmd || cmd.cmd === 'chat') return;
+
+    if (cmd.cmd === 'switch' || cmd.cmd === 'restore') {
+      if (!cmd.alias) return;
+      addChatMsg('assistant', '检测到切换命令，正在执行...');
+      api('restore', { alias: cmd.alias }).then(d => {
+        if (d.ok) addChatMsg('assistant', '已切换到: ' + cmd.alias);
+        else addChatMsg('assistant', '切换失败: ' + (d.error || '未知错误'), true);
+      });
+    } else if (cmd.cmd === 'backup') {
+      if (!cmd.game || !cmd.alias) return;
+      addChatMsg('assistant', '检测到备份命令，正在执行...');
+      api('backup', { game: cmd.game, alias: cmd.alias }).then(d => {
+        if (d.ok) addChatMsg('assistant', '备份成功: ' + cmd.alias);
+        else addChatMsg('assistant', '备份失败: ' + (d.error || '未知错误'), true);
+      });
+    } else if (cmd.cmd === 'list') {
+      api('accounts', {}).then(d => {
+        if (d.accounts && d.accounts.length > 0) {
+          var list = d.accounts.map(a => a.alias + ' (' + a.display + ')').join('<br>');
+          addChatMsg('assistant', '已备份账号:<br>' + list);
+        } else {
+          addChatMsg('assistant', '暂无备份账号');
+        }
+      });
+    } else if (cmd.cmd === 'detect') {
+      api('detect').then(d => {
+        if (d.games) {
+          var installed = d.games.filter(g => g.installed).map(g => g.display).join(', ');
+          addChatMsg('assistant', '已安装游戏: ' + (installed || '无'));
+        }
+      });
+    } else if (cmd.cmd === 'delete') {
+      if (!cmd.alias) return;
+      addChatMsg('assistant', '删除操作需在「账号管理」标签页手动确认执行。');
+    }
+  } catch(e) {}
 }
 
 refreshGames();

@@ -68,10 +68,10 @@ account_backup() {
     _subdirs="$(get_pkg_subdirs "$_game_name")"
     _backup_count=0
 
-    IFS=',' 
+    IFS=','
     for _subdir in $_subdirs; do
         _subdir="$(echo "$_subdir" | tr -d ' ')"
-        _src="$game_data/$_subdir"
+        _src="$_game_data/$_subdir"
         _dst="$_data_dir/$_subdir"
 
         if [ -d "$_src" ]; then
@@ -122,7 +122,7 @@ account_list() {
 
     if [ ! -d "$_dirs" ]; then
         log_info "暂无已备份账号"
-        log_info "使用 'qiuhe.sh backup <游戏> <别名>' 创建第一个账号存档"
+        log_info "使用 '清荷 backup <游戏> <别名>' 创建第一个账号存档"
         return 0
     fi
 

@@ -28,6 +28,7 @@ start_web() {
     cp "$QIUHE_HOME/lib/games.sh" "$WEB_DIR/" 2>/dev/null
     cp "$QIUHE_HOME/lib/games.ini" "$WEB_DIR/" 2>/dev/null
     cp "$QIUHE_HOME/lib/common.sh" "$WEB_DIR/" 2>/dev/null
+    cp "$QIUHE_HOME/lib/ai.sh" "$WEB_DIR/" 2>/dev/null
 
     chmod 755 "$WEB_DIR/api.sh"
 

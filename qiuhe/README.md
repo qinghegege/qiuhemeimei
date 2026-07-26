@@ -42,9 +42,9 @@ sh qiuhe.sh delete 大号
 
 ### Magisk/KSU 模块安装
 
-1. 将 `qiuhe/module/` 目录打包为 zip
-2. 通过 Magisk Manager 或 KernelSU 刷入
-3. 安装后终端直接使用 `qiuhe` 命令
+1. 将 `清荷-module-*.zip` 通过 Magisk Manager 或 KernelSU 刷入
+2. 安装后重启
+3. 终端直接使用 `清荷` 命令
 
 ## 内置支持的游戏
 
@@ -62,5 +62,5 @@ sh qiuhe.sh delete 大号
 
 | 环境 | 路径 |
 |------|------|
-| Magisk/KSU 模块 | `/data/adb/modules/qiuhe/data/` |
-| Shell 独立运行 | 脚本所在目录 `./qiuhe-data/` |
+| Magisk/KSU 模块 | `/data/清荷/` |
+| Shell 独立运行 | 脚本所在目录 `./清荷-data/` |

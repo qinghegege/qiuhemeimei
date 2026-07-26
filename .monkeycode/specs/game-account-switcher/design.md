@@ -5,7 +5,7 @@ Updated: 2026-07-26
 
 ## 描述
 
-一套 Android 手机端 Shell 脚本工具，支持 MT 管理器直接执行 .sh 脚本，同时提供 Magisk/KernelSU 模块封装。通过备份和替换游戏在 `/data/data/<pkg>/` 下的私有数据目录，实现腾讯手游多账号快速切换。支持 openssl 加密存档和 .tar.gz 打包导入导出。
+一套 Android 手机端 Shell 脚本工具，支持 MT 管理器直接执行 .sh 脚本，同时提供 Magisk/KernelSU 模块封装。通过备份和替换游戏在 `/data/data/<pkg>/` 下的私有数据目录，实现腾讯手游多账号快速切换。支持 openssl 加密存档、.tar.gz 打包导入导出，以及通过 DeepSeek AI 实现自然语言账号管理。
 
 ## 架构
 
@@ -19,6 +19,7 @@ graph TD
     D --> F["switch 模块"]
     D --> G["detect 模块"]
     D --> H["export/import 模块"]
+    D --> N["ai 模块 DeepSeek"]
     E --> I["crypto 模块 openssl"]
     F --> I
     H --> I
@@ -28,6 +29,8 @@ graph TD
     F --> K["进程检测 pgrep/ps"]
     G --> L["包名扫描 pm list"]
     A --> M["环境检测 MT/Terminal/ADB"]
+    N --> O["DeepSeek API"]
+    O --> D
 ```
 
 ## 双形态交付
@@ -42,7 +45,7 @@ graph TD
 
 **Magisk 模块结构：**
 ```
-qiuhe-module.zip
+清荷-module.zip
 ├── META-INF/com/google/android/update-binary
 ├── module.prop
 ├── customize.sh          # 安装脚本
@@ -50,7 +53,7 @@ qiuhe-module.zip
 ├── service.sh            # 开机服务（可选）
 └── system/
     └── bin/
-        └── qiuhe         # 符号链接到主脚本，安装后全局可用
+        └── 清荷           # 安装后全局可用命令
 ```
 
 ## 组件与接口
@@ -113,6 +116,49 @@ qiuhe-module.zip
 | `detect_games` | 扫描已安装腾讯手游 |
 | `match_pkg` | 包名匹配已知游戏列表 |
 | `show_data_size` | 显示游戏数据目录大小 |
+
+### DeepSeek AI 模块 `lib/ai.sh`
+
+通过 DeepSeek Chat API 实现自然语言驱动的账号管理。用户在 Web UI 中直接输入自然语言指令，AI 解析后自动执行对应操作。
+
+| 函数 | 职责 |
+|------|------|
+| `ai_chat <prompt> [system_prompt]` | 调用 DeepSeek Chat API 进行对话 |
+| `ai_parse_command <input>` | 将自然语言输入解析为 qiuhe 命令 JSON |
+| `ai_status` | 查询 AI 配置状态（是否已配置 API Key） |
+| `load_ai_config` | 从 `$DATA_DIR/ai.conf` 加载 API Key 和模型配置 |
+| `save_ai_config <api_key>` | 保存 API Key 到配置文件 |
+
+**API 端点（Web UI）：**
+
+| 端点 | 方法 | 参数 | 说明 |
+|------|------|------|------|
+| `/api/ai/chat` | POST | `msg` | 发送消息给 AI，返回对话结果 |
+| `/api/ai/config?action=get` | GET | - | 查询 API Key 配置状态 |
+| `/api/ai/config?action=set` | POST | `key` | 设置 API Key |
+| `/api/ai/config?action=delete` | POST | - | 清除 API Key |
+
+**AI 命令解析流程：**
+```
+用户输入自然语言 → ai_chat(带命令解析 system prompt) → DeepSeek API → JSON 命令
+                                                                    ↓
+                                          {"cmd":"switch","game":"sgame","alias":"大号"}
+                                                                    ↓
+                                              switch_account("大号") 自动执行
+```
+
+**配置文件 `ai.conf` 格式：**
+```sh
+AI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+AI_MODEL="deepseek-chat"
+```
+
+**Web UI 交互方式：**
+- 新增「AI 助手」Tab 页
+- 聊天式对话界面，支持自然语言输入
+- 快捷指令按钮（列出账号、检测游戏、切号示例）
+- AI 回复中的操作命令自动解析并执行
+- 设置面板配置/清除 API Key
 
 ## 数据模型
 
@@ -178,9 +224,9 @@ wuxia|com.tencent.tmgp.wuxia|/data/data/com.tencent.tmgp.wuxia|shared_prefs,data
 
 | 环境 | 数据目录 | 特性 |
 |------|---------|------|
-| Magisk/KSU 模块 | `/data/adb/modules/qiuhe/data/` | 模块化管理，卸载可选清数据 |
-| Shell 独立运行 | 脚本所在目录 `./qiuhe-data/` | 随脚本移动，方便迁移 |
-| 用户自定义 | 通过 `--data-dir` 指定 | 灵活存放 |
+| Magisk/KSU 模块 | `/data/清荷/` | 模块化管理，卸载可选清数据 |
+| Shell 独立运行 | 脚本所在目录 `./清荷-data/` | 随脚本移动，方便迁移 |
+| 用户自定义 | 通过 `QH_DATA_DIR` 环境变量指定 | 灵活存放 |
 
 ## 命令结构
 

@@ -69,8 +69,9 @@
   - 在 `qiuhe.sh` 中实现 `get_data_dir` 的 Magisk 模块路径分支 `/data/adb/modules/qiuhe/data/`
   - [ ] 13.7 验证模块 zip 包可被 Magisk Manager 和 KernelSU 正确安装卸载
 
-- [ ] 14. 最终检查点 - 全流程验证
-  - 确认所有子命令路由正确
-  - 确认错误处理覆盖所有异常场景（无 root/存储不足/openssl 缺失/游戏运行中/存档损坏）
-  - 确认 `detect` 命令可正确识别已安装游戏
-  - 确认备份→列表→切换→检测→导出→删除 全链路可用
+- [ ] 15. DeepSeek AI 集成
+  - [x] 创建 `lib/ai.sh` DeepSeek API 客户端模块
+  - [x] 在 `web/api.sh` 中添加 `/api/ai/chat`、`/api/ai/config`、`/api/ai/command` 端点
+  - [x] 在 `web/index.html` 中添加「AI 助手」Tab 和聊天界面
+  - [x] 在 `module/webroot/index.html` 中同步 AI 助手界面
+  - [ ] 15.5 用户配置 API Key 后验证自然语言对话和命令解析功能

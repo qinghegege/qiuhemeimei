@@ -3,8 +3,8 @@
 # Magisk/KSU 模块 - 卸载脚本
 #===============================================================================
 
-QIUHE_DIR="/data/adb/qiuhe"
-DATA_DIR="/data/adb/qiuhe/data"
+SCRIPT_DIR="/data/adb/清荷"
+DATA_DIR="/data/清荷"
 
 echo ""
 echo "=========================================="
@@ -30,12 +30,14 @@ case "$choice" in
         echo ""
         echo "账号存档已保留在 $DATA_DIR"
         echo "下次安装本模块时可恢复使用"
+        # 清理脚本目录但保留数据
+        rm -rf "$SCRIPT_DIR"
         ;;
     *)
         echo ""
         echo "正在删除所有数据..."
         rm -rf "$DATA_DIR"
-        rm -f "/data/adb/qiuhe"
+        rm -rf "$SCRIPT_DIR"
         echo "数据已清除"
         ;;
 esac

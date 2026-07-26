@@ -6,7 +6,9 @@
 WEB_DIR="$(cd "$(dirname "$0")" && pwd)"
 QIUHE_HOME="$(dirname "$WEB_DIR")"
 
-export QIUHE_DATA_DIR="${QIUHE_DATA_DIR:-$QIUHE_HOME/qiuhe-data}"
+# QH_DATA_DIR 若已由环境设置则沿用，否则交 common.sh 自动检测
+# （Magisk 模块环境由开机脚本导出，独立运行由终端用户设置）
+export QH_DATA_DIR="${QH_DATA_DIR:-}"
 
 . "$QIUHE_HOME/lib/common.sh" 2>/dev/null || . "$WEB_DIR/common.sh" 2>/dev/null
 . "$QIUHE_HOME/lib/games.sh" 2>/dev/null || . "$WEB_DIR/games.sh" 2>/dev/null
@@ -14,6 +16,7 @@ export QIUHE_DATA_DIR="${QIUHE_DATA_DIR:-$QIUHE_HOME/qiuhe-data}"
 . "$QIUHE_HOME/lib/account.sh" 2>/dev/null
 . "$QIUHE_HOME/lib/detect.sh" 2>/dev/null
 . "$QIUHE_HOME/lib/switch.sh" 2>/dev/null
+. "$QIUHE_HOME/lib/ai.sh" 2>/dev/null
 
 ensure_data_dirs
 
@@ -157,13 +160,65 @@ case "$_action" in
         exit 0
         ;;
 
+    ai/chat)
+        _msg="$(get_param msg "")"
+        if [ -z "$_msg" ]; then
+            output_error "请输入消息内容"
+            exit 1
+        fi
+        _resp="$(ai_chat "$_msg")"
+        output_json "$_resp"
+        exit 0
+        ;;
+
+    ai/config)
+        _action="$(get_param action "")"
+        load_ai_config
+        case "$_action" in
+            get)
+                ai_status
+                exit 0
+                ;;
+            set)
+                _key="$(get_param key "")"
+                if [ -z "$_key" ]; then
+                    output_error "请提供 API Key"
+                    exit 1
+                fi
+                save_ai_config "$_key"
+                output_json "{\"ok\":true,\"message\":\"API Key 已保存\"}"
+                exit 0
+                ;;
+            delete)
+                cat /dev/null > "$AI_CONFIG" 2>/dev/null
+                output_json "{\"ok\":true,\"message\":\"配置已清除\"}"
+                exit 0
+                ;;
+            *)
+                output_error "ai/config 用法: action=get|set|delete"
+                exit 1
+                ;;
+        esac
+        ;;
+
+    ai/command)
+        _msg="$(get_param msg "")"
+        if [ -z "$_msg" ]; then
+            output_error "请输入指令内容"
+            exit 1
+        fi
+        _resp="$(ai_parse_command "$_msg")"
+        output_json "$_resp"
+        exit 0
+        ;;
+
     status)
         output_json "{\"ok\":true,\"version\":\"v1.0.0\",\"dataDir\":\"$DATA_DIR\"}"
         exit 0
         ;;
 
     *)
-        output_json "{\"error\":\"未知接口\",\"usage\":\"detect|accounts|backup|restore|delete|status\"}"
+        output_json "{\"error\":\"未知接口\",\"usage\":\"detect|accounts|backup|restore|delete|status|ai/chat|ai/config|ai/command\"}"
         exit 1
         ;;
 esac

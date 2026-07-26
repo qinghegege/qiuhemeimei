@@ -233,7 +233,7 @@ switch_account() {
 
     if [ "$_match_count" -eq 0 ]; then
         log_err "账号不存在: $_alias"
-        log_info "使用 'qiuhe.sh list' 查看可用账号"
+        log_info "使用 '清荷 list' 查看可用账号"
         return 1
     fi
 

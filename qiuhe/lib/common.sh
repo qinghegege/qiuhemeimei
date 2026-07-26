@@ -91,24 +91,23 @@ check_dependencies() {
 }
 
 # --- 数据目录获取 ---
-# 三种策略: Magisk 模块路径 > 脚本同级目录 > 用户自定义
+# 三种策略: 环境变量 > Magisk模块路径 > 脚本同级目录
 get_data_dir() {
-    if [ -n "$QIUHE_DATA_DIR" ]; then
-        echo "$QIUHE_DATA_DIR"
+    if [ -n "$QH_DATA_DIR" ]; then
+        echo "$QH_DATA_DIR"
         return
     fi
 
-    # Magisk/KSU 模块环境
-    if [ -d "/data/adb/modules/qiuhe" ] && [ "$(basename "$QIUHE_HOME")" = "qiuhe" ]; then
-        MODULE_DATA="/data/adb/modules/qiuhe/data"
-        if [ -d "$MODULE_DATA" ]; then
-            echo "$MODULE_DATA"
-            return
-        fi
+    # Magisk/KSU 模块环境: 数据在 /data/清荷/
+    if [ -d "/data/adb/modules/清荷" ]; then
+        _dd="/data/清荷"
+        mkdir -p "$_dd" 2>/dev/null
+        echo "$_dd"
+        return
     fi
 
     # 脚本同级目录
-    echo "$QIUHE_HOME/qiuhe-data"
+    echo "$QIUHE_HOME/清荷-data"
 }
 
 DATA_DIR="$(get_data_dir)"

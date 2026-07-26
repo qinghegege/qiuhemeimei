@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>qiuhe</title>
+<title>清荷</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0d0d;color:#ddd;min-height:100vh}
@@ -38,20 +38,65 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0d0d;
 .spin{display:inline-block;width:14px;height:14px;border:2px solid #444;border-top-color:#4a6cf7;border-radius:50%;animation:s .6s linear infinite}
 @keyframes s{to{transform:rotate(360deg)}}
 .empty{padding:30px 0;text-align:center;color:#555;font-size:13px}
+.empty{padding:30px 0;text-align:center;color:#555;font-size:13px}
 .dim{opacity:.4}
+/* AI */
+.cht{display:flex;flex-direction:column;height:calc(100vh - 190px);min-height:350px}
+.chm{flex:1;overflow-y:auto;padding:6px 0}
+.chb{max-width:85%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word;margin-bottom:10px}
+.chb.u{background:#4a6cf7;color:#fff;border-bottom-right-radius:4px;margin-left:auto}
+.chb.a{background:#1e1e3a;color:#bbb;border-bottom-left-radius:4px}
+.chb.e{background:#4a1a1a;color:#f99}
+.chtm{font-size:10px;color:#555;margin:-6px 0 8px 4px}
+.chi{display:flex;gap:6px;padding:10px 0;border-top:1px solid #222}
+.chi input{flex:1;padding:9px 12px;border:1px solid #333;border-radius:18px;background:#0f0f0f;color:#fff;font-size:13px;outline:0}
+.chi input:focus{border-color:#4a6cf7}
+.chq{display:flex;gap:5px;flex-wrap:wrap;padding:6px 0}
+.chq .btn{font-size:11px;padding:5px 9px;border-radius:11px}
+.chs{margin-bottom:8px;padding:8px 10px;background:#1a1a2e;border-radius:10px;display:none}
+.chs.on{display:block}
+.chs input{width:100%;padding:8px 10px;margin:5px 0;border:1px solid #333;border-radius:6px;background:#0f0f0f;color:#fff;font-size:13px;outline:0}
+.chs input:focus{border-color:#4a6cf7}
 </style>
 </head>
 <body>
 
-<div class="header"><h1>qiuhe</h1><s>腾讯手游账号本地切换</s></div>
+<div class="header"><h1>清荷</h1><s>腾讯手游账号本地切换 · DeepSeek AI</s></div>
 
 <div class="container">
   <div class="tabs">
     <button class="tab on" onclick="tab(this,'games')">游戏列表</button>
     <button class="tab" onclick="tab(this,'accounts')">账号管理</button>
+    <button class="tab" onclick="tab(this,'ai')">AI 助手</button>
   </div>
   <div id="games"><div class="empty">检测中... <span class="spin"></span></div></div>
   <div id="accounts" style="display:none"><div class="empty">加载中... <span class="spin"></span></div></div>
+  <div id="ai" style="display:none">
+    <div class="chs" id="ai-cfg">
+      <div style="font-size:12px;color:#999;margin-bottom:3px">DeepSeek API Key</div>
+      <input type="password" id="ai-key" placeholder="sk-xxxxxxxxxxxxxxxx">
+      <div style="display:flex;gap:5px;margin-top:5px">
+        <button class="btn btn-blue" style="font-size:11px;padding:5px 10px" onclick="aiSaveCfg()">保存</button>
+        <button class="btn btn-red" style="font-size:11px;padding:5px 10px" onclick="aiDelCfg()">清除</button>
+      </div>
+      <div style="font-size:10px;color:#555;margin-top:3px">获取: platform.deepseek.com/api_keys</div>
+    </div>
+    <div class="chq">
+      <button class="btn btn-ghost" onclick="aiQuick('列出所有已备份的账号')">列出账号</button>
+      <button class="btn btn-ghost" onclick="aiQuick('检测已安装的游戏')">检测游戏</button>
+      <button class="btn btn-ghost" onclick="aiQuick('切换账号到我的大号')">切号示例</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('ai-cfg').classList.toggle('on')">设置</button>
+    </div>
+    <div class="cht">
+      <div class="chm" id="chm">
+        <div class="chb a">你好，我是 清荷 AI 助手。<br><br>配置 DeepSeek API Key 后，可以直接用自然语言管理账号。<br>点击「设置」按钮配置。</div>
+      </div>
+      <div class="chi">
+        <input type="text" id="chi" placeholder="输入消息..." onkeydown="if(event.key==='Enter')aiSend()">
+        <button class="btn btn-blue" onclick="aiSend()">发送</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="t" class="toast"></div>
@@ -61,10 +106,10 @@ var API='http://127.0.0.1:8848/api';
 
 function toast(m,c){var t=document.getElementById('t');t.className='toast '+(c||'')+' on';t.textContent=m;setTimeout(function(){t.classList.remove('on')},2000)}
 
-function tab(el,id){document.querySelectorAll('.tab').forEach(function(e){e.classList.remove('on')});el.classList.add('on');document.getElementById('games').style.display=id==='games'?'':'none';document.getElementById('accounts').style.display=id==='accounts'?'':'none';if(id==='accounts')loadAccounts()}
+function tab(el,id){document.querySelectorAll('.tab').forEach(function(e){e.classList.remove('on')});el.classList.add('on');document.getElementById('games').style.display=id==='games'?'':'none';document.getElementById('accounts').style.display=id==='accounts'?'':'none';document.getElementById('ai').style.display=id==='ai'?'':'none';if(id==='accounts')loadAccounts();if(id==='ai')aiInit()}
 
 function api(path,params,cb){var u=API+'/'+path;var o={method:'GET'};if(params){o.method='POST';o.headers={'Content-Type':'application/x-www-form-urlencoded'};o.body=Object.entries(params).map(function(kv){return kv[0]+'='+encodeURIComponent(kv[1])}).join('&')}
-fetch(u,o).then(function(r){return r.json()}).then(cb).catch(function(){toast('无法连接服务,请检查模块状态','err');document.getElementById('games').innerHTML='<div class="empty">服务未启动<br><br>请先运行: sh /data/adb/modules/qiuhe/service.sh</div>'})}
+fetch(u,o).then(function(r){return r.json()}).then(cb).catch(function(){toast('无法连接服务,请检查模块状态','err');document.getElementById('games').innerHTML='<div class="empty">服务未启动<br><br>请先运行: sh /data/adb/modules/清荷/service.sh</div>'})}
 
 function loadGames(){api('detect',0,function(d){var g=d.games||[];var h='';var i=g.filter(function(x){return x.installed});var n=g.filter(function(x){return !x.installed});if(!i.length)h+='<div class="empty">未检测到已安装游戏</div>';i.forEach(function(g){h+='<div class="card"><div class="card-top"><span class="card-title">'+g.display+'</span><span class="badge badge-ok">已安装</span></div><div class="card-meta">'+g.pkg+' | 数据: '+g.size+'</div><div class="card-act"><button class="btn btn-blue" onclick="doBackup(\''+g.name+'\',\''+g.display+'\')">备份</button><button class="btn btn-ghost" onclick="viewAccts(\''+g.name+'\',\''+g.display+'\')">查看备份</button></div></div>'});if(n.length){h+='<div style="font-size:13px;color:#888;margin:12px 0 6px;padding-left:2px">未安装</div>';n.forEach(function(g){h+='<div class="card dim"><div class="card-top"><span class="card-title">'+g.display+'</span><span class="badge badge-no">未安装</span></div><div class="card-meta">'+g.pkg+'</div></div>'})}document.getElementById('games').innerHTML=h})}
 
@@ -77,6 +122,28 @@ function loadAccounts(filter){api('accounts',filter?{game:filter}:{},function(d)
 function doSwitch(alias){if(!confirm('切换到「'+alias+'」？\n会自动备份当前数据'))return;document.getElementById('accounts').innerHTML='<div class="empty">切换中... <span class="spin"></span></div>';api('restore',{alias:alias},function(d){if(d.ok)toast('已切换: '+alias,'ok');else toast(d.error||'失败','err');loadAccounts()})}
 
 function doDel(alias){if(!confirm('删除「'+alias+'」？'))return;api('delete',{alias:alias},function(d){if(d.ok)toast('已删除','ok');else toast(d.error||'失败','err');loadAccounts()})}
+
+// AI
+var aiOk=false;
+
+function aiInit(){api('ai/config',{action:'get'}).then(function(d){if(d.configured){aiOk=true;document.getElementById('ai-cfg').classList.remove('on')}else{aiOk=false;document.getElementById('ai-cfg').classList.add('on')}}).catch(function(){})}
+
+function aiSaveCfg(){var k=document.getElementById('ai-key').value.trim();if(!k){toast('请输入 Key','err');return}api('ai/config',{action:'set',key:k}).then(function(d){if(d.ok){aiOk=true;document.getElementById('ai-cfg').classList.remove('on');toast('已保存','ok');aiAdd('a','配置成功。现在可以直接用自然语言管理账号了。')}else toast(d.error||'失败','err')}).catch(function(){toast('请求失败','err')})}
+
+function aiDelCfg(){if(!confirm('确认清除？'))return;api('ai/config',{action:'delete'}).then(function(d){aiOk=false;document.getElementById('ai-key').value='';toast('已清除','ok')}).catch(function(){toast('请求失败','err')})}
+
+function aiAdd(r,c,e){var m=document.getElementById('chm');var d=document.createElement('div');d.className='chb '+(r==='u'?'u':(e?'e':'a'));d.innerHTML=c.replace(/\n/g,'<br>');m.appendChild(d);var t=document.createElement('div');t.className='chtm';t.textContent=new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});m.appendChild(t);m.scrollTop=m.scrollHeight}
+
+function aiTyping(){var m=document.getElementById('chm');var d=document.createElement('div');d.id='ty';d.innerHTML='<div class="chb a"><span class="spin"></span> 思考中...</div>';m.appendChild(d);m.scrollTop=m.scrollHeight}
+
+function aiHideTyping(){var e=document.getElementById('ty');if(e)e.remove()}
+
+function aiSend(){var i=document.getElementById('chi');var m=i.value.trim();if(!m)return;i.value='';aiAdd('u',m);if(!aiOk){aiAdd('a','请先点击「设置」配置 API Key',true);return}
+aiTyping();api('ai/chat',{msg:m}).then(function(d){aiHideTyping();var r='';if(d.error){r=d.error==='api_key_not_configured'?'请先配置 API Key':'错误: '+d.error;aiAdd('a',r,true);if(d.error==='api_key_not_configured')document.getElementById('ai-cfg').classList.add('on')}else if(d.choices&&d.choices[0]&&d.choices[0].message){r=d.choices[0].message.content;aiAdd('a',r);aiParseCmd(r)}else if(d.choices&&d.choices[0]&&d.choices[0].delta){r=d.choices[0].delta.content||JSON.stringify(d);aiAdd('a',r)}else{aiAdd('a','API 返回异常',true)}}).catch(function(){aiHideTyping();aiAdd('a','网络请求失败',true)})}
+
+function aiQuick(c){document.getElementById('chi').value=c;aiSend()}
+
+function aiParseCmd(t){var m=t.match(/\{[^}]*"cmd"[^}]*\}/);if(!m)return;try{var c=JSON.parse(m[0]);if(!c.cmd||c.cmd==='chat')return;if(c.cmd==='switch'||c.cmd==='restore'){if(!c.alias)return;aiAdd('a','检测到切换命令，正在执行...');api('restore',{alias:c.alias},function(d){if(d.ok)aiAdd('a','已切换到: '+c.alias);else aiAdd('a','切换失败: '+(d.error||'未知'),true)})}else if(c.cmd==='backup'){if(!c.game||!c.alias)return;aiAdd('a','检测到备份命令，正在执行...');api('backup',{game:c.game,alias:c.alias},function(d){if(d.ok)aiAdd('a','备份成功: '+c.alias);else aiAdd('a','备份失败: '+(d.error||'未知'),true)})}else if(c.cmd==='list'){api('accounts',{},function(d){if(d.accounts&&d.accounts.length>0){var l=d.accounts.map(function(a){return a.alias+' ('+a.display+')'}).join('<br>');aiAdd('a','已备份账号:<br>'+l)}else aiAdd('a','暂无备份账号')})}else if(c.cmd==='detect'){api('detect',{},function(d){if(d.games){var i=d.games.filter(function(g){return g.installed}).map(function(g){return g.display}).join(', ');aiAdd('a','已安装游戏: '+(i||'无'))}})}else if(c.cmd==='delete'){if(!c.alias)return;aiAdd('a','删除操作需在「账号管理」标签页手动确认')}}catch(e){}}
 
 loadGames();
 </script>
