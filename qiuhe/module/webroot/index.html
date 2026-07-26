@@ -2,148 +2,223 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>清荷</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d0d0d;color:#ddd;min-height:100vh}
-.header{background:#1a1a2e;padding:14px 16px;text-align:center;border-bottom:1px solid #2a2a3e}
-.header h1{font-size:18px;color:#fff}
-.header s{font-size:11px;color:#888}
-.container{padding:12px 14px;max-width:500px;margin:0 auto}
-.tabs{display:flex;gap:0;margin-bottom:14px;background:#1a1a2e;border-radius:10px;overflow:hidden}
-.tab{flex:1;padding:10px;text-align:center;font-size:13px;color:#999;background:0;border:0;cursor:pointer;transition:.2s}
-.tab.on{background:#4a6cf7;color:#fff}
-.card{background:#1a1a2e;border-radius:10px;padding:12px 14px;margin-bottom:8px;border:1px solid #222}
-.card-top{display:flex;justify-content:space-between;align-items:center}
-.card-title{font-size:15px;color:#fff;font-weight:600}
-.card-meta{font-size:11px;color:#777;margin-top:3px}
-.card-act{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-.btn{padding:7px 14px;border:0;border-radius:7px;font-size:12px;cursor:pointer;font-weight:500;transition:.2s}
-.btn:active{opacity:.7}
-.btn-blue{background:#4a6cf7;color:#fff}
-.btn-green{background:#10b981;color:#fff}
-.btn-red{background:#ef4444;color:#fff}
-.btn-ghost{background:0;border:1px solid #444;color:#aaa}
-.badge{display:inline-block;padding:3px 8px;border-radius:8px;font-size:10px}
-.badge-ok{background:#065f46;color:#6ee7b7}
-.badge-no{background:#1f2937;color:#666}
-.input-row{display:flex;gap:8px;margin-bottom:10px}
-.input-row input{flex:1;padding:10px 12px;border:1px solid #333;border-radius:8px;background:#0f0f0f;color:#fff;font-size:14px;outline:0}
-.input-row input:focus{border-color:#4a6cf7}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 18px;border-radius:20px;font-size:12px;z-index:9;opacity:0;transition:.3s}
-.toast.on{opacity:1}
-.toast.err{background:#c0392b}
-.toast.ok{background:#27ae60}
-.spin{display:inline-block;width:14px;height:14px;border:2px solid #444;border-top-color:#4a6cf7;border-radius:50%;animation:s .6s linear infinite}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:linear-gradient(180deg,#FFF0F5,#FFE4E1,#FFD6E0);color:#5D4E5F;min-height:100vh}
+.hd{background:linear-gradient(135deg,#FF6B9D,#FF85AB);padding:18px 16px 14px;text-align:center;position:relative;box-shadow:0 2px 12px rgba(255,107,157,0.25)}
+.hd .rb{font-size:28px;display:block;margin-bottom:2px}
+.hd h1{font-size:20px;color:#fff;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,0.1)}
+.hd s{font-size:11px;color:rgba(255,255,255,0.8)}
+.ct{padding:10px 14px 70px;max-width:460px;margin:0 auto}
+.dh{text-align:center;font-size:12px;letter-spacing:3px;margin:6px 0;color:#FFB8CC}
+
+.gc{background:#fff;border-radius:14px;padding:14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(255,107,157,0.06);border:1px solid #FFE4EC;cursor:pointer;transition:transform .12s}
+.gc:active{transform:scale(0.98)}
+.gt{display:flex;align-items:center;gap:10px}
+.gi{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.gn{font-size:14px;font-weight:600;color:#5D4E5F}
+.gm{font-size:10px;color:#B8A9C6;margin-top:1px}
+.bdg{font-size:9px;padding:2px 7px;border-radius:6px;font-weight:500}
+.bok{background:#E8F5E9;color:#66BB6A}
+.bno{background:#F5F5F5;color:#C0B8C8}
+.arr{font-size:18px;color:#D4C4E0;margin-left:auto}
+
+.dtl{display:none}
+.dtl.on{display:block}
+.db{display:flex;align-items:center;gap:4px;font-size:13px;color:#FF6B9D;margin-bottom:12px;cursor:pointer;font-weight:500}
+.db:active{opacity:.7}
+
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:13px;font-size:14px;font-weight:600;cursor:pointer;text-align:center;transition:opacity .12s;margin-bottom:7px}
+.btn:active{opacity:.75}
+.bp{background:linear-gradient(135deg,#FF6B9D,#FF85AB);color:#fff;box-shadow:0 3px 10px rgba(255,107,157,0.25)}
+.bm{background:linear-gradient(135deg,#98D8C8,#7EC8B0);color:#fff;box-shadow:0 3px 10px rgba(152,216,200,0.25)}
+.bc{background:linear-gradient(135deg,#FF8A80,#FF6E60);color:#fff;box-shadow:0 3px 8px rgba(255,138,128,0.2)}
+.bw{background:#fff;color:#FF6B9D;border:2px solid #FFE4EC}
+.bsm{padding:9px 13px;font-size:12px;border-radius:8px;display:inline-block;width:auto;margin:0}
+
+.as{margin-top:12px}
+.ast{font-size:12px;color:#B8A9C6;font-weight:600;margin-bottom:6px}
+.ai{background:#fff;border-radius:11px;padding:12px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;border:1px solid #FFE4EC}
+.ail{flex:1;min-width:0}
+.aan{font-size:14px;font-weight:600;color:#5D4E5F}
+.aam{font-size:9px;color:#C0B8C8;margin-top:1px}
+.aia{display:flex;gap:5px;flex-shrink:0}
+
+.emp{text-align:center;padding:30px 0;color:#C0B8C8}
+.emp .em{font-size:40px}
+.emp .tx{font-size:13px;line-height:1.6;margin-top:6px}
+
+.ld{text-align:center;padding:30px 0}
+.sp{display:inline-block;width:22px;height:22px;border:3px solid #FFE4EC;border-top-color:#FF6B9D;border-radius:50%;animation:s .8s linear infinite;margin-bottom:6px}
 @keyframes s{to{transform:rotate(360deg)}}
-.empty{padding:30px 0;text-align:center;color:#555;font-size:13px}
-.empty{padding:30px 0;text-align:center;color:#555;font-size:13px}
-.dim{opacity:.4}
-/* AI */
-.cht{display:flex;flex-direction:column;height:calc(100vh - 190px);min-height:350px}
-.chm{flex:1;overflow-y:auto;padding:6px 0}
-.chb{max-width:85%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word;margin-bottom:10px}
-.chb.u{background:#4a6cf7;color:#fff;border-bottom-right-radius:4px;margin-left:auto}
-.chb.a{background:#1e1e3a;color:#bbb;border-bottom-left-radius:4px}
-.chb.e{background:#4a1a1a;color:#f99}
-.chtm{font-size:10px;color:#555;margin:-6px 0 8px 4px}
-.chi{display:flex;gap:6px;padding:10px 0;border-top:1px solid #222}
-.chi input{flex:1;padding:9px 12px;border:1px solid #333;border-radius:18px;background:#0f0f0f;color:#fff;font-size:13px;outline:0}
-.chi input:focus{border-color:#4a6cf7}
-.chq{display:flex;gap:5px;flex-wrap:wrap;padding:6px 0}
-.chq .btn{font-size:11px;padding:5px 9px;border-radius:11px}
-.chs{margin-bottom:8px;padding:8px 10px;background:#1a1a2e;border-radius:10px;display:none}
-.chs.on{display:block}
-.chs input{width:100%;padding:8px 10px;margin:5px 0;border:1px solid #333;border-radius:6px;background:#0f0f0f;color:#fff;font-size:13px;outline:0}
-.chs input:focus{border-color:#4a6cf7}
+.lt{font-size:12px;color:#C0B8C8}
+
+.tst{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:9px 20px;border-radius:22px;font-size:12px;z-index:9;opacity:0;transition:.3s;font-weight:500}
+.tst.on{opacity:1}
+.tst.ok{background:#98D8C8;color:#fff}
+.tst.er{background:#FF8A80;color:#fff}
+.tst.in{background:rgba(0,0,0,0.75);color:#fff}
+
+.mo{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:7;display:none;align-items:flex-end;justify-content:center}
+.mo.on{display:flex}
+.md{background:#fff;width:100%;max-width:460px;border-radius:18px 18px 0 0;padding:20px 16px 24px;max-height:65vh;overflow-y:auto}
+.md h3{font-size:16px;color:#5D4E5F;margin-bottom:4px;font-weight:700}
+.md p{font-size:12px;color:#B8A9C6;margin-bottom:12px}
+.md input{width:100%;padding:10px 12px;border:2px solid #FFE4EC;border-radius:10px;font-size:14px;color:#5D4E5F;outline:none;background:#FFF8FA;margin-bottom:10px}
+.md input:focus{border-color:#FF6B9D}
+.cf{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:10;display:none;align-items:center;justify-content:center}
+.cf.on{display:flex}
+.cb{background:#fff;border-radius:14px;padding:22px 18px;text-align:center;width:270px}
+.cb h3{font-size:15px;color:#5D4E5F;margin-bottom:6px}
+.cb p{font-size:12px;color:#B8A9C6;margin-bottom:16px;line-height:1.4}
+.cr{display:flex;gap:7px}
+
+.fab{position:fixed;bottom:18px;right:14px;width:46px;height:46px;border-radius:23px;background:linear-gradient(135deg,#FF6B9D,#FF85AB);color:#fff;font-size:22px;border:none;box-shadow:0 3px 12px rgba(255,107,157,0.3);cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+.fab:active{transform:scale(0.9)}
+
+.aip{position:fixed;top:0;left:0;right:0;bottom:0;background:#FFF5F7;z-index:6;display:none;flex-direction:column}
+.aip.on{display:flex}
+.aih{background:linear-gradient(135deg,#FF6B9D,#FF85AB);padding:12px 14px;display:flex;align-items:center;gap:8px;color:#fff}
+.aih .ab{font-size:18px;cursor:pointer;padding:2px}
+.aih .at{font-size:15px;font-weight:600;flex:1}
+.ach{flex:1;overflow-y:auto;padding:10px 12px}
+.abb{max-width:85%;padding:9px 12px;border-radius:12px;font-size:12px;line-height:1.4;margin-bottom:8px;word-break:break-word}
+.abb.u{margin-left:auto;background:#FF6B9D;color:#fff;border-bottom-right-radius:3px}
+.abb.b{background:#fff;color:#5D4E5F;border-bottom-left-radius:3px;box-shadow:0 1px 3px rgba(255,107,157,0.04)}
+.abb.e{background:#FFE0E0;color:#C0392B}
+.ain{display:flex;gap:6px;padding:8px 12px;border-top:1px solid #FFE4EC;background:#fff}
+.ain input{flex:1;padding:9px 12px;border:2px solid #FFE4EC;border-radius:18px;font-size:13px;outline:none;background:#FFF8FA;color:#5D4E5F}
+.ain input:focus{border-color:#FF6B9D}
+.aic{margin:6px 12px;padding:8px 10px;background:#fff;border-radius:10px;display:none;border:1px solid #FFE4EC}
+.aic.on{display:block}
+.aic input{width:100%;padding:7px 8px;border:1px solid #FFE4EC;border-radius:7px;font-size:12px;margin:4px 0;outline:none;background:#FFF8FA}
+.aic input:focus{border-color:#FF6B9D}
 </style>
 </head>
 <body>
 
-<div class="header"><h1>清荷</h1><s>腾讯手游账号本地切换 · DeepSeek AI</s></div>
+<div class="hd"><span class="rb">🎀</span><h1>清荷</h1><s>腾讯手游账号切换 · Hello Kitty</s></div>
 
-<div class="container">
-  <div class="tabs">
-    <button class="tab on" onclick="tab(this,'games')">游戏列表</button>
-    <button class="tab" onclick="tab(this,'accounts')">账号管理</button>
-    <button class="tab" onclick="tab(this,'ai')">AI 助手</button>
-  </div>
-  <div id="games"><div class="empty">检测中... <span class="spin"></span></div></div>
-  <div id="accounts" style="display:none"><div class="empty">加载中... <span class="spin"></span></div></div>
-  <div id="ai" style="display:none">
-    <div class="chs" id="ai-cfg">
-      <div style="font-size:12px;color:#999;margin-bottom:3px">DeepSeek API Key</div>
-      <input type="password" id="ai-key" placeholder="sk-xxxxxxxxxxxxxxxx">
-      <div style="display:flex;gap:5px;margin-top:5px">
-        <button class="btn btn-blue" style="font-size:11px;padding:5px 10px" onclick="aiSaveCfg()">保存</button>
-        <button class="btn btn-red" style="font-size:11px;padding:5px 10px" onclick="aiDelCfg()">清除</button>
-      </div>
-      <div style="font-size:10px;color:#555;margin-top:3px">获取: platform.deepseek.com/api_keys</div>
-    </div>
-    <div class="chq">
-      <button class="btn btn-ghost" onclick="aiQuick('列出所有已备份的账号')">列出账号</button>
-      <button class="btn btn-ghost" onclick="aiQuick('检测已安装的游戏')">检测游戏</button>
-      <button class="btn btn-ghost" onclick="aiQuick('切换账号到我的大号')">切号示例</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('ai-cfg').classList.toggle('on')">设置</button>
-    </div>
-    <div class="cht">
-      <div class="chm" id="chm">
-        <div class="chb a">你好，我是 清荷 AI 助手。<br><br>配置 DeepSeek API Key 后，可以直接用自然语言管理账号。<br>点击「设置」按钮配置。</div>
-      </div>
-      <div class="chi">
-        <input type="text" id="chi" placeholder="输入消息..." onkeydown="if(event.key==='Enter')aiSend()">
-        <button class="btn btn-blue" onclick="aiSend()">发送</button>
-      </div>
-    </div>
+<div class="ct">
+  <div id="pg"><div class="dh">♥ ♥ ♥</div><div id="gl"><div class="ld"><div class="sp"></div><div class="lt">正在检测游戏...</div></div></div></div>
+  <div id="pd" class="dtl">
+    <div class="db" onclick="back()">← 返回游戏列表</div>
+    <div style="font-size:18px;font-weight:700;color:#5D4E5F;margin-bottom:2px" id="dn"></div>
+    <div style="font-size:11px;color:#B8A9C6;margin-bottom:14px" id="dm"></div>
+    <div id="dc"></div>
   </div>
 </div>
 
-<div id="t" class="toast"></div>
+<button class="fab" onclick="aiOpen()">✨</button>
+
+<div class="aip" id="aip">
+  <div class="aih">
+    <span class="ab" onclick="aiClose()">←</span><span class="at">AI 助手</span>
+    <button class="btn bsm bw" style="margin:0;padding:4px 8px;font-size:10px" onclick="document.getElementById('aicf').classList.toggle('on')">⚙</button>
+  </div>
+  <div class="aic" id="aicf">
+    <div style="font-size:11px;color:#B8A9C6;margin-bottom:2px">DeepSeek API Key</div>
+    <input type="password" id="aik" placeholder="sk-xxxxxxxx">
+    <div style="display:flex;gap:5px;margin-top:3px">
+      <button class="btn bp bsm" style="margin:0" onclick="aiSave()">保存</button>
+      <button class="btn bc bsm" style="margin:0" onclick="aiDelCfg()">清除</button>
+    </div>
+  </div>
+  <div class="ach" id="ach">
+    <div class="abb b">你好呀~ 我是清荷 AI 助手 💕<br><br>配置 DeepSeek API Key 后，就可以用自然语言管理账号啦。</div>
+  </div>
+  <div class="ain">
+    <input type="text" id="ait" placeholder="比如: 切换到王者荣耀大号" onkeydown="if(event.key==='Enter')aiSend()">
+    <button class="btn bp" style="width:auto;margin:0;padding:9px 16px;border-radius:18px;font-size:13px" onclick="aiSend()">发送</button>
+  </div>
+</div>
+
+<div class="mo" id="mo"><div class="md" id="md"></div></div>
+<div class="cf" id="cfo"><div class="cb"><h3 id="cft"></h3><p id="cfm"></p><div class="cr"><button class="btn bw" style="flex:1;margin:0" onclick="cfClose(false)">取消</button><button class="btn bp" style="flex:1;margin:0" id="cfk">确认</button></div></div></div>
+<div id="t" class="tst"></div>
 
 <script>
 var API='http://127.0.0.1:8848/api';
+var cg=null,cgd='',aiOk=false;
 
-function toast(m,c){var t=document.getElementById('t');t.className='toast '+(c||'')+' on';t.textContent=m;setTimeout(function(){t.classList.remove('on')},2000)}
+function toast(m,c){var t=document.getElementById('t');t.className='tst '+(c||'in')+' on';t.textContent=m;setTimeout(function(){t.classList.remove('on')},2000)}
+function cfShow(tt,mm,cb){document.getElementById('cft').textContent=tt;document.getElementById('cfm').textContent=mm;document.getElementById('cfo').classList.add('on');document.getElementById('cfk').onclick=function(){cfClose(true)};window._cfcb=cb}
+function cfClose(ok){document.getElementById('cfo').classList.remove('on');if(ok&&window._cfcb)window._cfcb();window._cfcb=null}
 
-function tab(el,id){document.querySelectorAll('.tab').forEach(function(e){e.classList.remove('on')});el.classList.add('on');document.getElementById('games').style.display=id==='games'?'':'none';document.getElementById('accounts').style.display=id==='accounts'?'':'none';document.getElementById('ai').style.display=id==='ai'?'':'none';if(id==='accounts')loadAccounts();if(id==='ai')aiInit()}
+function api(path,pr,cb){
+  var u=API+'/'+path;
+  var o={method:'GET'};
+  if(pr){o.method='POST';o.headers={'Content-Type':'application/x-www-form-urlencoded'};o.body=Object.entries(pr).map(function(kv){return kv[0]+'='+encodeURIComponent(kv[1])}).join('&')}
+  fetch(u,o).then(function(r){return r.json()}).then(cb).catch(function(){toast('无法连接服务,请检查模块状态','er');document.getElementById('gl').innerHTML='<div class="emp"><div class="em">😿</div><div class="tx">服务未启动</div></div>'})
+}
 
-function api(path,params,cb){var u=API+'/'+path;var o={method:'GET'};if(params){o.method='POST';o.headers={'Content-Type':'application/x-www-form-urlencoded'};o.body=Object.entries(params).map(function(kv){return kv[0]+'='+encodeURIComponent(kv[1])}).join('&')}
-fetch(u,o).then(function(r){return r.json()}).then(cb).catch(function(){toast('无法连接服务,请检查模块状态','err');document.getElementById('games').innerHTML='<div class="empty">服务未启动<br><br>请先运行: sh /data/adb/modules/qinghe/service.sh</div>'})}
+function gicon(n){
+  var m={sgame:{e:'👑',b:'#FFF0E0'},pubgm:{e:'🔫',b:'#E8F5E9'},cf:{e:'💣',b:'#FFEBEE'},speed:{e:'🏎️',b:'#E3F2FD'},cod:{e:'🎯',b:'#F3E5F5'},jkchess:{e:'♟️',b:'#FFF8E1'},lolm:{e:'⚔️',b:'#E0F7FA'},kihan:{e:'🍥',b:'#FFF3E0'},wuxia:{e:'🌸',b:'#FCE4EC'}};
+  return m[n]||{e:'🎮',b:'#F5F5F5'}
+}
 
-function loadGames(){api('detect',0,function(d){var g=d.games||[];var h='';var i=g.filter(function(x){return x.installed});var n=g.filter(function(x){return !x.installed});if(!i.length)h+='<div class="empty">未检测到已安装游戏</div>';i.forEach(function(g){h+='<div class="card"><div class="card-top"><span class="card-title">'+g.display+'</span><span class="badge badge-ok">已安装</span></div><div class="card-meta">'+g.pkg+' | 数据: '+g.size+'</div><div class="card-act"><button class="btn btn-blue" onclick="doBackup(\''+g.name+'\',\''+g.display+'\')">备份</button><button class="btn btn-ghost" onclick="viewAccts(\''+g.name+'\',\''+g.display+'\')">查看备份</button></div></div>'});if(n.length){h+='<div style="font-size:13px;color:#888;margin:12px 0 6px;padding-left:2px">未安装</div>';n.forEach(function(g){h+='<div class="card dim"><div class="card-top"><span class="card-title">'+g.display+'</span><span class="badge badge-no">未安装</span></div><div class="card-meta">'+g.pkg+'</div></div>'})}document.getElementById('games').innerHTML=h})}
+function loadGames(){
+  api('detect',0,function(d){
+    var gs=d.games||[],i=gs.filter(function(g){return g.installed}),n=gs.filter(function(g){return !g.installed}),h='';
+    if(!i.length)h+='<div class="emp"><div class="em">🎮</div><div class="tx">未检测到已安装的腾讯手游</div></div>';
+    i.forEach(function(g){var ic=gicon(g.name);h+='<div class="gc" onclick="openGame(\''+g.name+'\',\''+g.display+'\',\''+g.size+'\')"><div class="gt"><div class="gi" style="background:'+ic.b+'">'+ic.e+'</div><div style="flex:1"><div class="gn">'+g.display+'</div><div class="gm">'+g.pkg+' · 数据: '+g.size+'</div></div><span class="bdg bok">已安装</span><span class="arr">›</span></div></div>'});
+    if(n.length){h+='<div style="font-size:11px;color:#C0B8C8;margin:14px 0 6px;font-weight:600">未安装</div>';n.forEach(function(g){h+='<div class="gc" style="opacity:0.5;cursor:default"><div class="gt"><div class="gi" style="background:#F0F0F0">❓</div><div style="flex:1"><div class="gn">'+g.display+'</div><div class="gm">'+g.pkg+'</div></div><span class="bdg bno">未安装</span></div></div>'})}
+    document.getElementById('gl').innerHTML=h;
+  })
+}
 
-function doBackup(game,display){var a=prompt('为「'+display+'」当前账号命名:');if(!a)return;document.getElementById('games').innerHTML='<div class="empty">备份中... <span class="spin"></span></div>';api('backup',{game:game,alias:a},function(d){if(d.ok)toast('备份成功: '+a,'ok');else toast(d.error||'失败','err');loadGames()})}
+function openGame(nm,dp,sz){
+  cg=nm;cgd=dp;var ic=gicon(nm);
+  document.getElementById('pg').style.display='none';document.getElementById('pd').classList.add('on');
+  document.getElementById('dn').textContent=ic.e+' '+dp;document.getElementById('dm').textContent='数据大小: '+sz;
+  loadDetail()
+}
 
-function viewAccts(game,display){document.querySelectorAll('.tab')[1].click();loadAccounts(game)}
+function back(){document.getElementById('pd').classList.remove('on');document.getElementById('pg').style.display='';loadGames()}
 
-function loadAccounts(filter){api('accounts',filter?{game:filter}:{},function(d){var a=d.accounts||[];var h='';if(filter)h+='<div style="margin-bottom:12px"><button class="btn btn-ghost" onclick="document.querySelectorAll(\'.tab\')[0].click()">← 返回</button></div>';if(!a.length){h+='<div class="empty">暂无备份</div>';document.getElementById('accounts').innerHTML=h;return}var by={};a.forEach(function(x){var k=x.game;if(!by[k])by[k]={d:x.display,a:[]};by[k].a.push(x)});for(var k in by){var g=by[k];h+='<div style="font-size:13px;color:#888;margin:10px 0 6px;padding-left:2px">'+g.d+'</div><div class="card">';g.a.forEach(function(x){h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1f1f3a"><div><div style="font-size:14px;color:#fff">'+x.alias+'</div><div style="font-size:10px;color:#666;margin-top:2px">'+x.time+' | '+x.size+'</div></div><div style="display:flex;gap:5px"><button class="btn btn-green" style="padding:6px 10px;font-size:11px" onclick="doSwitch(\''+x.alias+'\')">切换</button><button class="btn btn-red" style="padding:6px 10px;font-size:11px" onclick="doDel(\''+x.alias+'\')">删</button></div></div>'});h+='</div>'}document.getElementById('accounts').innerHTML=h})}
+function loadDetail(){
+  var ct=document.getElementById('dc');ct.innerHTML='<div class="ld"><div class="sp"></div><div class="lt">加载中...</div></div>';
+  api('accounts',{game:cg},function(d){
+    var ac=d.accounts||[],h='';
+    h+='<button class="btn bp" onclick="doBackup()">📦 备份当前账号</button>';
+    h+='<div class="as"><div class="ast">📋 已备份账号 ('+ac.length+')</div>';
+    if(!ac.length)h+='<div class="emp"><div class="em">📭</div><div class="tx">还没有备份过账号</div></div>';
+    else ac.forEach(function(a){h+='<div class="ai"><div class="ail"><div class="aan">'+a.alias+'</div><div class="aam">'+a.time+' · '+a.size+'</div></div><div class="aia"><button class="btn bm bsm" onclick="doSwitch(\''+a.alias+'\')">切换</button><button class="btn bc bsm" onclick="doDel(\''+a.alias+'\')">删除</button></div></div>'});
+    h+='</div>';ct.innerHTML=h
+  })
+}
 
-function doSwitch(alias){if(!confirm('切换到「'+alias+'」？\n会自动备份当前数据'))return;document.getElementById('accounts').innerHTML='<div class="empty">切换中... <span class="spin"></span></div>';api('restore',{alias:alias},function(d){if(d.ok)toast('已切换: '+alias,'ok');else toast(d.error||'失败','err');loadAccounts()})}
+function doBackup(){
+  var a=prompt('💕 为当前账号取个名字:');if(!a||!a.trim())return;a=a.trim();
+  document.getElementById('dc').innerHTML='<div class="ld"><div class="sp"></div><div class="lt">正在备份...</div></div>';
+  api('backup',{game:cg,alias:a},function(d){if(d.ok){toast('备份成功: '+a,'ok');loadDetail()}else{toast(d.error||'失败','er');loadDetail()}})
+}
 
-function doDel(alias){if(!confirm('删除「'+alias+'」？'))return;api('delete',{alias:alias},function(d){if(d.ok)toast('已删除','ok');else toast(d.error||'失败','err');loadAccounts()})}
+function doSwitch(al){
+  cfShow('切换账号','确认切换到「'+al+'」？<br>切换前会自动备份当前数据。',function(){
+    document.getElementById('dc').innerHTML='<div class="ld"><div class="sp"></div><div class="lt">正在切换...</div></div>';
+    api('restore',{alias:al},function(d){if(d.ok){toast('已切换: '+al,'ok');loadDetail()}else{toast(d.error||'失败','er');loadDetail()}})
+  })
+}
+
+function doDel(al){
+  cfShow('删除账号','确认删除「'+al+'」？<br>此操作不可恢复。',function(){
+    api('delete',{alias:al},function(d){if(d.ok){toast('已删除: '+al,'ok');loadDetail()}else{toast(d.error||'失败','er');loadDetail()}})
+  })
+}
 
 // AI
-var aiOk=false;
-
-function aiInit(){api('ai/config',{action:'get'}).then(function(d){if(d.configured){aiOk=true;document.getElementById('ai-cfg').classList.remove('on')}else{aiOk=false;document.getElementById('ai-cfg').classList.add('on')}}).catch(function(){})}
-
-function aiSaveCfg(){var k=document.getElementById('ai-key').value.trim();if(!k){toast('请输入 Key','err');return}api('ai/config',{action:'set',key:k}).then(function(d){if(d.ok){aiOk=true;document.getElementById('ai-cfg').classList.remove('on');toast('已保存','ok');aiAdd('a','配置成功。现在可以直接用自然语言管理账号了。')}else toast(d.error||'失败','err')}).catch(function(){toast('请求失败','err')})}
-
-function aiDelCfg(){if(!confirm('确认清除？'))return;api('ai/config',{action:'delete'}).then(function(d){aiOk=false;document.getElementById('ai-key').value='';toast('已清除','ok')}).catch(function(){toast('请求失败','err')})}
-
-function aiAdd(r,c,e){var m=document.getElementById('chm');var d=document.createElement('div');d.className='chb '+(r==='u'?'u':(e?'e':'a'));d.innerHTML=c.replace(/\n/g,'<br>');m.appendChild(d);var t=document.createElement('div');t.className='chtm';t.textContent=new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});m.appendChild(t);m.scrollTop=m.scrollHeight}
-
-function aiTyping(){var m=document.getElementById('chm');var d=document.createElement('div');d.id='ty';d.innerHTML='<div class="chb a"><span class="spin"></span> 思考中...</div>';m.appendChild(d);m.scrollTop=m.scrollHeight}
-
+function aiOpen(){document.getElementById('aip').classList.add('on');document.querySelector('.fab').style.display='none';api('ai/config',{action:'get'},function(d){if(d.configured){aiOk=true;document.getElementById('aicf').classList.remove('on')}else{aiOk=false;document.getElementById('aicf').classList.add('on')}})}
+function aiClose(){document.getElementById('aip').classList.remove('on');document.querySelector('.fab').style.display='flex'}
+function aiSave(){var k=document.getElementById('aik').value.trim();if(!k){toast('请输入 Key','er');return}api('ai/config',{action:'set',key:k},function(d){if(d.ok){aiOk=true;document.getElementById('aicf').classList.remove('on');toast('已保存','ok');aiAdd('b','配置成功~ 现在可以用自然语言管理账号啦 💕')}else toast(d.error||'失败','er')})}
+function aiDelCfg(){cfShow('清除配置','确认清除 API Key？',function(){api('ai/config',{action:'delete'},function(d){aiOk=false;document.getElementById('aik').value='';toast('已清除','ok')})})}
+function aiAdd(r,c,e){var ch=document.getElementById('ach');var d=document.createElement('div');d.className='abb '+(r==='u'?'u':(e?'e':'b'));d.innerHTML=c.replace(/\n/g,'<br>');ch.appendChild(d);ch.scrollTop=ch.scrollHeight}
+function aiSend(){var i=document.getElementById('ait');var m=i.value.trim();if(!m)return;i.value='';aiAdd('u',m);if(!aiOk){aiAdd('b','请先点击 ⚙ 配置 API Key',true);return}aiTyping();api('ai/chat',{msg:m},function(d){aiHideTyping();if(d.error){aiAdd('b','错误: '+d.error,true);return}if(d.choices&&d.choices[0]&&d.choices[0].message){var r=d.choices[0].message.content;aiAdd('b',r);aiPCmd(r)}else aiAdd('b','返回异常',true)})}
+function aiTyping(){var ch=document.getElementById('ach');var d=document.createElement('div');d.id='ty';d.innerHTML='<div class="abb b" style="color:#C0B8C8;font-size:11px">思考中...</div>';ch.appendChild(d);ch.scrollTop=ch.scrollHeight}
 function aiHideTyping(){var e=document.getElementById('ty');if(e)e.remove()}
-
-function aiSend(){var i=document.getElementById('chi');var m=i.value.trim();if(!m)return;i.value='';aiAdd('u',m);if(!aiOk){aiAdd('a','请先点击「设置」配置 API Key',true);return}
-aiTyping();api('ai/chat',{msg:m}).then(function(d){aiHideTyping();var r='';if(d.error){r=d.error==='api_key_not_configured'?'请先配置 API Key':'错误: '+d.error;aiAdd('a',r,true);if(d.error==='api_key_not_configured')document.getElementById('ai-cfg').classList.add('on')}else if(d.choices&&d.choices[0]&&d.choices[0].message){r=d.choices[0].message.content;aiAdd('a',r);aiParseCmd(r)}else if(d.choices&&d.choices[0]&&d.choices[0].delta){r=d.choices[0].delta.content||JSON.stringify(d);aiAdd('a',r)}else{aiAdd('a','API 返回异常',true)}}).catch(function(){aiHideTyping();aiAdd('a','网络请求失败',true)})}
-
-function aiQuick(c){document.getElementById('chi').value=c;aiSend()}
-
-function aiParseCmd(t){var m=t.match(/\{[^}]*"cmd"[^}]*\}/);if(!m)return;try{var c=JSON.parse(m[0]);if(!c.cmd||c.cmd==='chat')return;if(c.cmd==='switch'||c.cmd==='restore'){if(!c.alias)return;aiAdd('a','检测到切换命令，正在执行...');api('restore',{alias:c.alias},function(d){if(d.ok)aiAdd('a','已切换到: '+c.alias);else aiAdd('a','切换失败: '+(d.error||'未知'),true)})}else if(c.cmd==='backup'){if(!c.game||!c.alias)return;aiAdd('a','检测到备份命令，正在执行...');api('backup',{game:c.game,alias:c.alias},function(d){if(d.ok)aiAdd('a','备份成功: '+c.alias);else aiAdd('a','备份失败: '+(d.error||'未知'),true)})}else if(c.cmd==='list'){api('accounts',{},function(d){if(d.accounts&&d.accounts.length>0){var l=d.accounts.map(function(a){return a.alias+' ('+a.display+')'}).join('<br>');aiAdd('a','已备份账号:<br>'+l)}else aiAdd('a','暂无备份账号')})}else if(c.cmd==='detect'){api('detect',{},function(d){if(d.games){var i=d.games.filter(function(g){return g.installed}).map(function(g){return g.display}).join(', ');aiAdd('a','已安装游戏: '+(i||'无'))}})}else if(c.cmd==='delete'){if(!c.alias)return;aiAdd('a','删除操作需在「账号管理」标签页手动确认')}}catch(e){}}
+function aiPCmd(t){var m=t.match(/\{[^}]*"cmd"[^}]*\}/);if(!m)return;try{var c=JSON.parse(m[0]);if(!c.cmd||c.cmd==='chat')return;if(c.cmd==='switch'||c.cmd==='restore'){if(!c.alias)return;aiAdd('b','正在切换...');api('restore',{alias:c.alias},function(d){if(d.ok)aiAdd('b','已切换到: '+c.alias);else aiAdd('b','切换失败','e')})}else if(c.cmd==='backup'){if(!c.game||!c.alias)return;aiAdd('b','正在备份...');api('backup',{game:c.game,alias:c.alias},function(d){if(d.ok)aiAdd('b','备份成功: '+c.alias);else aiAdd('b','备份失败','e')})}else if(c.cmd==='list'){api('accounts',{},function(d){if(d.accounts&&d.accounts.length){var l=d.accounts.map(function(a){return a.alias+' ('+a.display+')'}).join('<br>');aiAdd('b','已备份:<br>'+l)}else aiAdd('b','暂无备份')})}else if(c.cmd==='detect'){api('detect',{},function(d){if(d.games){var i=d.games.filter(function(g){return g.installed}).map(function(g){return g.display}).join(', ');aiAdd('b','已安装: '+(i||'无'))}})}else if(c.cmd==='delete')aiAdd('b','删除操作请在游戏详情页手动确认')}catch(e){}}
 
 loadGames();
 </script>
