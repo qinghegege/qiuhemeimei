@@ -10,6 +10,11 @@ echo ""
 echo "=========================================="
 echo "  腾讯手游账号切换器 - 卸载"
 echo "=========================================="
+
+# 停止后台 API 服务
+pkill -f "busybox httpd.*8848" 2>/dev/null
+echo ""
+echo "已停止 WebUI 服务"
 echo ""
 echo "账号存档数据在: $DATA_DIR"
 echo ""

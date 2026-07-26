@@ -39,6 +39,10 @@ cp -f "$MODDIR/../web/index.html" "$QIUHE_DIR/web/" 2>/dev/null || true
 chmod 755 "$QIUHE_DIR/web/api.sh"
 chmod 755 "$QIUHE_DIR/web/server.sh"
 
+ui_print "- 设置 WebUI..."
+cp -f "$QIUHE_DIR/web/api.sh" "$MODDIR/webroot/api.sh" 2>/dev/null || true
+chmod 755 "$MODDIR/webroot/api.sh" 2>/dev/null || true
+
 ui_print "- 创建全局命令..."
 mkdir -p "$MODDIR/system/bin"
 cat > "$MODDIR/system/bin/qiuhe" << 'SCRIPT'
