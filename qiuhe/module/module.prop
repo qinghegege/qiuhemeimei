@@ -1,0 +1,6 @@
+id=qiuhe
+name=腾讯手游账号切换器
+version=v1.0.0
+versionCode=1
+author=qiuhemeimei
+description=手机端腾讯游戏账号本地快速切换工具，支持王者荣耀、和平精英、CF手游等多款腾讯手游。通过备份和替换游戏数据目录实现多账号切换。

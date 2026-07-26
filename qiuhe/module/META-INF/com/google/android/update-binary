@@ -1,0 +1,30 @@
+#!/sbin/sh
+#===============================================================================
+# Magisk 模块 - 安装二进制入口
+#===============================================================================
+
+#################
+# Initialization
+#################
+
+umask 022
+
+echo "******************************"
+echo " qiuhe - 腾讯手游账号切换器"
+echo "******************************"
+
+OUTFD=$2
+ZIPFILE=$3
+
+mount /data 2>/dev/null
+
+# 安装模块: 由 Magisk 自动解压并执行 customize.sh
+# 此处由 update-binary 调用的 install_module 函数处理
+
+. /data/adb/magisk/util_functions.sh 2>/dev/null || . /data/adb/ksu/util_functions.sh 2>/dev/null || {
+    echo "! 无法加载 Magisk/KSU 函数库"
+    exit 1
+}
+
+install_module
+exit 0

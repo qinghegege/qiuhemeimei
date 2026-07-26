@@ -1,0 +1,23 @@
+# 数据目录（账号存档和快照）
+qiuhe-data/
+data/
+
+# 加密文件
+*.enc
+
+# 备份文件
+*.bak
+
+# 临时文件
+*.tmp
+*.swp
+
+# tar 包
+*.tar.gz
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
