@@ -63,23 +63,12 @@ _action="${_action%%\?*}"
 
 case "$_action" in
     detect)
-        _pkgs=""
-        while IFS='|' read -r _name _pkg _path _subdirs; do
-            [ -z "$_name" ] && continue
-            _display="$(get_display_name "$_name")"
-            _installed="false"
-            if pm list packages 2>/dev/null | grep -q "package:${_pkg}"; then
-                _installed="true"
-                _size="$(dir_size "$_path")"
-            else
-                _size="0"
-            fi
-
-            if [ -n "$_pkgs" ]; then _pkgs="$_pkgs,"; fi
-            _pkgs="${_pkgs}{\"name\":\"$_name\",\"display\":\"$_display\",\"pkg\":\"$_pkg\",\"installed\":$_installed,\"size\":\"$_size\"}"
-        done < "$GAMES_INI"
-
-        output_json "{\"games\":[$_pkgs]}"
+        _entries="$(detect_all_entries)"
+        if [ -z "$_entries" ]; then
+            output_json "{\"games\":[]}"
+        else
+            output_json "{\"games\":[$_entries]}"
+        fi
         exit 0
         ;;
 
@@ -114,13 +103,14 @@ case "$_action" in
     backup)
         _game="$(get_param game "")"
         _alias="$(get_param alias "")"
+        _path="$(get_param path "")"
 
         if [ -z "$_game" ] || [ -z "$_alias" ]; then
             output_error "请提供游戏和账号别名"
             exit 1
         fi
 
-        if account_backup "$_game" "$_alias" >/dev/null 2>&1; then
+        if account_backup "$_game" "$_alias" "$_path" >/dev/null 2>&1; then
             output_json "{\"ok\":true,\"alias\":\"$_alias\"}"
         else
             output_error "备份失败"

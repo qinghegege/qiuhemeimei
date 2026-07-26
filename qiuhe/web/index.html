@@ -188,6 +188,8 @@ body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',sans-serif;backg
 var API='/api';
 var currentGame=null;
 var currentGameDisplay='';
+var currentGamePath='';
+var currentIsClone=false;
 var aiOk=false;
 
 // --- 工具函数 ---
@@ -237,11 +239,12 @@ function loadGames(){
     if(!installed.length)h+='<div class="empty"><div class="emoji">🎮</div><div class="text">未检测到已安装的腾讯手游<br><br>请确认已安装游戏并授予 Root 权限</div></div>';
     installed.forEach(function(g){
       var icon=gameIcon(g.name);
-      h+='<div class="game-card" onclick="openGame(\''+g.name+'\',\''+g.display+'\',\''+g.size+'\')">';
+      var label=g.clone?' · 分身':'';
+      h+='<div class="game-card" onclick="openGame(\''+g.name+'\',\''+g.display+label+'\',\''+(g.size||'0')+'\',\''+(g.path||'')+'\','+!!g.clone+')">';
       h+='<div class="gc-top">';
       h+='<div class="gc-icon" style="background:'+icon.bg+'">'+icon.emoji+'</div>';
-      h+='<div class="gc-info"><div class="gc-name">'+g.display+'</div><div class="gc-meta">'+g.pkg+' · 数据: '+g.size+'</div></div>';
-      h+='<span class="badge-on gc-badge">已安装</span>';
+      h+='<div class="gc-info"><div class="gc-name">'+g.display+label+'</div><div class="gc-meta">'+g.pkg+' · 数据: '+(g.size||'0')+'</div></div>';
+      h+='<span class="badge-on gc-badge">'+(g.clone?'分身':'已安装')+'</span>';
       h+='<span class="gc-arrow">›</span>';
       h+='</div></div>';
     });
@@ -277,9 +280,11 @@ function gameIcon(name){
 
 // --- 游戏详情 ---
 
-function openGame(name,display,size){
+function openGame(name,display,size,path,isClone){
   currentGame=name;
   currentGameDisplay=display;
+  currentGamePath=path||'';
+  currentIsClone=!!isClone;
   var icon=gameIcon(name);
   document.getElementById('page-games').style.display='none';
   document.getElementById('page-detail').classList.add('on');
@@ -338,7 +343,9 @@ function doBackup(){
   var ct=document.getElementById('detail-content');
   ct.innerHTML='<div class="loading"><div class="spin"></div><div class="loading-text">正在备份...</div></div>';
 
-  api('backup',{game:currentGame,alias:alias}).then(function(d){
+  var body={game:currentGame,alias:alias};
+  if(currentGamePath)body.path=currentGamePath;
+  api('backup',body).then(function(d){
     if(d.ok){
       toast('备份成功: '+alias,'ok');
       loadGameDetail(currentGame);

@@ -141,7 +141,7 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:linear-gr
 
 <script>
 var API='http://127.0.0.1:8848/api';
-var cg=null,cgd='',aiOk=false;
+var cg=null,cgd='',cgpt='',cgcl=false,aiOk=false;
 
 function toast(m,c){var t=document.getElementById('t');t.className='tst '+(c||'in')+' on';t.textContent=m;setTimeout(function(){t.classList.remove('on')},2000)}
 function cfShow(tt,mm,cb){document.getElementById('cft').textContent=tt;document.getElementById('cfm').textContent=mm;document.getElementById('cfo').classList.add('on');document.getElementById('cfk').onclick=function(){cfClose(true)};window._cfcb=cb}
@@ -163,14 +163,14 @@ function loadGames(){
   api('detect',0,function(d){
     var gs=d.games||[],i=gs.filter(function(g){return g.installed}),n=gs.filter(function(g){return !g.installed}),h='';
     if(!i.length)h+='<div class="emp"><div class="em">🎮</div><div class="tx">未检测到已安装的腾讯手游</div></div>';
-    i.forEach(function(g){var ic=gicon(g.name);h+='<div class="gc" onclick="openGame(\''+g.name+'\',\''+g.display+'\',\''+g.size+'\')"><div class="gt"><div class="gi" style="background:'+ic.b+'">'+ic.e+'</div><div style="flex:1"><div class="gn">'+g.display+'</div><div class="gm">'+g.pkg+' · 数据: '+g.size+'</div></div><span class="bdg bok">已安装</span><span class="arr">›</span></div></div>'});
+    i.forEach(function(g){var ic=gicon(g.name);var lb=g.clone?' · 分身':'';var pt=g.path||'';var cj=''+!!g.clone;h+='<div class="gc" onclick="openGame(\''+g.name+'\',\''+g.display+lb+'\',\''+(g.size||'0')+'\',\''+pt+'\','+cj+')"><div class="gt"><div class="gi" style="background:'+ic.b+'">'+ic.e+'</div><div style="flex:1"><div class="gn">'+g.display+lb+'</div><div class="gm">'+g.pkg+' · 数据: '+(g.size||'0')+'</div></div><span class="bdg bok">'+(g.clone?'分身':'已安装')+'</span><span class="arr">›</span></div></div>'});
     if(n.length){h+='<div style="font-size:11px;color:#C0B8C8;margin:14px 0 6px;font-weight:600">未安装</div>';n.forEach(function(g){h+='<div class="gc" style="opacity:0.5;cursor:default"><div class="gt"><div class="gi" style="background:#F0F0F0">❓</div><div style="flex:1"><div class="gn">'+g.display+'</div><div class="gm">'+g.pkg+'</div></div><span class="bdg bno">未安装</span></div></div>'})}
     document.getElementById('gl').innerHTML=h;
   })
 }
 
-function openGame(nm,dp,sz){
-  cg=nm;cgd=dp;var ic=gicon(nm);
+function openGame(nm,dp,sz,pt,cl){
+  cg=nm;cgd=dp;cgpt=pt||'';cgcl=!!cl;var ic=gicon(nm);
   document.getElementById('pg').style.display='none';document.getElementById('pd').classList.add('on');
   document.getElementById('dn').textContent=ic.e+' '+dp;document.getElementById('dm').textContent='数据大小: '+sz;
   loadDetail()
@@ -193,7 +193,7 @@ function loadDetail(){
 function doBackup(){
   var a=prompt('💕 为当前账号取个名字:');if(!a||!a.trim())return;a=a.trim();
   document.getElementById('dc').innerHTML='<div class="ld"><div class="sp"></div><div class="lt">正在备份...</div></div>';
-  api('backup',{game:cg,alias:a},function(d){if(d.ok){toast('备份成功: '+a,'ok');loadDetail()}else{toast(d.error||'失败','er');loadDetail()}})
+  var bd={game:cg,alias:a};if(cgpt)bd.path=cgpt;api('backup',bd,function(d){if(d.ok){toast('备份成功: '+a,'ok');loadDetail()}else{toast(d.error||'失败','er');loadDetail()}})
 }
 
 function doSwitch(al){

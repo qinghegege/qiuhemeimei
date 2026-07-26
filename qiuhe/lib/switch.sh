@@ -104,13 +104,20 @@ apply_account() {
     _game="$(grep '"game"' "$_found_meta" | head -1 | sed 's/.*"game": *"//' | sed 's/".*//')"
     _pkg="$(grep '"package"' "$_found_meta" | head -1 | sed 's/.*"package": *"//' | sed 's/".*//')"
     _data_dir="$(_get_data_path "$_acct_dir")"
+    # 读取备份时记录的实际数据路径 (分身版路径可能不同于默认)
+    _stored_path="$(grep '"data_path"' "$_found_meta" 2>/dev/null | head -1 | sed 's/.*"data_path": *"//' | sed 's/".*//')"
 
     if [ ! -d "$_data_dir" ]; then
         log_err "账号数据目录不存在: $_data_dir"
         return 1
     fi
 
-    _game_data="$(get_pkg_data_path "$_game")"
+    # 优先使用存档路径, 回退到配置文件中的默认路径
+    if [ -n "$_stored_path" ] && [ -d "$_stored_path" ]; then
+        _game_data="$_stored_path"
+    else
+        _game_data="$(get_pkg_data_path "$_game")"
+    fi
     if [ ! -d "$_game_data" ]; then
         log_err "游戏数据目录不存在: $_game_data"
         return 1

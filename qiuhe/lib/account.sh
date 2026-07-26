@@ -23,12 +23,14 @@ _get_data_path() {
 }
 
 # 备份当前游戏数据为账号存档
+# 用法: account_backup <游戏简名> <账号别名> [自定义数据路径]
 account_backup() {
     _game_name="$1"
     _alias="$2"
+    _custom_path="$3"
 
     if [ -z "$_game_name" ] || [ -z "$_alias" ]; then
-        log_err "用法: backup <游戏简名> <账号别名>"
+        log_err "用法: backup <游戏简名> <账号别名> [数据路径]"
         return 1
     fi
 
@@ -42,7 +44,13 @@ account_backup() {
         return 1
     fi
 
-    _game_data="$(get_pkg_data_path "$_game_name")"
+    # 支持自定义路径（分身版等）
+    if [ -n "$_custom_path" ]; then
+        _game_data="$_custom_path"
+    else
+        _game_data="$(get_pkg_data_path "$_game_name")"
+    fi
+
     if [ ! -d "$_game_data" ]; then
         log_err "游戏数据目录不存在: $_game_data"
         return 1
@@ -99,7 +107,8 @@ account_backup() {
     "alias": "$_alias",
     "created_at": "$_now",
     "data_size": "$_size",
-    "backup_subdirs": "$_subdirs"
+    "backup_subdirs": "$_subdirs",
+    "data_path": "$_game_data"
 }
 EOF
 
