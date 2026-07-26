@@ -1,11 +1,9 @@
 #!/sbin/sh
 #===============================================================================
-# Magisk 模块 - 安装二进制入口
+# Magisk/KSU 模块 - 通用安装入口
+# 新版 KSU WebUI 会绕过此脚本直接执行 customize.sh
+# 此脚本仅用于 Magisk 和老版 KSU 的兼容
 #===============================================================================
-
-#################
-# Initialization
-#################
 
 umask 022
 
@@ -13,18 +11,40 @@ echo "******************************"
 echo " 清荷 - 腾讯手游账号切换器"
 echo "******************************"
 
-OUTFD=$2
-ZIPFILE=$3
-
 mount /data 2>/dev/null
 
-# 安装模块: 由 Magisk 自动解压并执行 customize.sh
-# 此处由 update-binary 调用的 install_module 函数处理
+# 尝试加载 Magisk 函数库
+if [ -f /data/adb/magisk/util_functions.sh ]; then
+    . /data/adb/magisk/util_functions.sh
+    install_module
+    exit 0
+fi
 
-. /data/adb/magisk/util_functions.sh 2>/dev/null || . /data/adb/ksu/util_functions.sh 2>/dev/null || {
-    echo "! 无法加载 Magisk/KSU 函数库"
+# 尝试加载 KSU 函数库
+if [ -f /data/adb/ksu/util_functions.sh ]; then
+    . /data/adb/ksu/util_functions.sh
+    install_module
+    exit 0
+fi
+
+# 新版 KSU (11998+) / APatch: 管理器直接执行 customize.sh
+# 如果走到这里，说明没有找到 Magisk/KSU 函数库
+# 尝试从 zip 中手动执行 customize.sh
+ZIPFILE="$3"
+if [ -n "$ZIPFILE" ] && [ -f "$ZIPFILE" ]; then
+    TMPDIR=/dev/tmp/qinghe_install
+    rm -rf "$TMPDIR"
+    mkdir -p "$TMPDIR"
+    unzip -o "$ZIPFILE" -d "$TMPDIR" >/dev/null 2>&1
+    if [ -f "$TMPDIR/customize.sh" ]; then
+        MODDIR="$TMPDIR"
+        export MODDIR
+        sh "$TMPDIR/customize.sh"
+    fi
+    rm -rf "$TMPDIR"
+else
+    echo "! 无法确定安装方式，请通过管理器 WebUI 安装"
     exit 1
-}
+fi
 
-install_module
 exit 0

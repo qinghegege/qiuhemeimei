@@ -98,9 +98,9 @@ get_data_dir() {
         return
     fi
 
-    # Magisk/KSU 模块环境: 数据在 /data/清荷/
-    if [ -d "/data/adb/modules/清荷" ]; then
-        _dd="/data/清荷"
+    # Magisk/KSU 模块环境: 数据在 /data/qinghe/
+    if [ -d "/data/adb/modules/qinghe" ]; then
+        _dd="/data/qinghe"
         mkdir -p "$_dd" 2>/dev/null
         echo "$_dd"
         return

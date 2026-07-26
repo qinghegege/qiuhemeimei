@@ -3,15 +3,14 @@
 # Magisk/KSU 模块 - 卸载脚本
 #===============================================================================
 
-SCRIPT_DIR="/data/adb/清荷"
-DATA_DIR="/data/清荷"
+SCRIPT_DIR="/data/adb/qinghe"
+DATA_DIR="/data/qinghe"
 
 echo ""
 echo "=========================================="
-echo "  腾讯手游账号切换器 - 卸载"
+echo "  清荷 - 腾讯手游账号切换器 - 卸载"
 echo "=========================================="
 
-# 停止后台 API 服务
 pkill -f "busybox httpd.*8848" 2>/dev/null
 echo ""
 echo "已停止 WebUI 服务"
@@ -30,7 +29,6 @@ case "$choice" in
         echo ""
         echo "账号存档已保留在 $DATA_DIR"
         echo "下次安装本模块时可恢复使用"
-        # 清理脚本目录但保留数据
         rm -rf "$SCRIPT_DIR"
         ;;
     *)
