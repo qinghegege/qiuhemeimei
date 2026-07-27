@@ -195,12 +195,10 @@ var aiOk=false;
 // --- 工具函数 ---
 
 function api(path,params){
-  var u=API+'/'+path;
-  var o={method:'GET'};
+  var u=API+'?action='+path;
+  var o={method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'}};
   if(params){
-    o.method='POST';
-    o.headers={'Content-Type':'application/x-www-form-urlencoded'};
-    o.body=Object.entries(params).map(function(kv){return kv[0]+'='+encodeURIComponent(kv[1])}).join('&');
+    o.body=Object.entries(params).map(function(kv){return kv[0]+'='+encodeURIComponent(kv[1])}).join('');
   }
   return fetch(u,o).then(function(r){return r.json()});
 }
@@ -400,7 +398,7 @@ function doDelete(alias){
 function openAi(){
   document.getElementById('ai-panel').classList.add('on');
   document.getElementById('ai-fab').style.display='none';
-  api('ai/config',{action:'get'}).then(function(d){
+  api('ai/config',{op:'get'}).then(function(d){
     if(d.configured){aiOk=true;document.getElementById('ai-cfg').classList.remove('on')}
     else{aiOk=false;document.getElementById('ai-cfg').classList.add('on')}
   }).catch(function(){});
@@ -414,7 +412,7 @@ function closeAi(){
 function aiSaveCfg(){
   var k=document.getElementById('ai-key').value.trim();
   if(!k){toast('请输入 Key','err');return}
-  api('ai/config',{action:'set',key:k}).then(function(d){
+  api('ai/config',{op:'set',key:k}).then(function(d){
     if(d.ok){aiOk=true;document.getElementById('ai-cfg').classList.remove('on');toast('已保存','ok');aiAdd('bot','配置成功~ 现在可以用自然语言管理账号啦 💕')}
     else toast(d.error||'失败','err')
   }).catch(function(){toast('请求失败','err')});
@@ -422,7 +420,7 @@ function aiSaveCfg(){
 
 function aiDelCfg(){
   showConfirm('清除配置','确认清除 API Key？',function(){
-    api('ai/config',{action:'delete'}).then(function(d){
+    api('ai/config',{op:'delete'}).then(function(d){
       aiOk=false;document.getElementById('ai-key').value='';toast('已清除','ok')
     });
   });

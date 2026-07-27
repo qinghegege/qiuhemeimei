@@ -148,9 +148,9 @@ function cfShow(tt,mm,cb){document.getElementById('cft').textContent=tt;document
 function cfClose(ok){document.getElementById('cfo').classList.remove('on');if(ok&&window._cfcb)window._cfcb();window._cfcb=null}
 
 function api(path,pr,cb){
-  var u=API+'/'+path;
-  var o={method:'GET'};
-  if(pr){o.method='POST';o.headers={'Content-Type':'application/x-www-form-urlencoded'};o.body=Object.entries(pr).map(function(kv){return kv[0]+'='+encodeURIComponent(kv[1])}).join('&')}
+  var u=API+'?action='+path;
+  var o={method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'}};
+  if(pr) o.body=Object.entries(pr).map(function(kv){return kv[0]+'='+encodeURIComponent(kv[1])}).join('');
   fetch(u,o).then(function(r){return r.json()}).then(cb).catch(function(){toast('无法连接服务,请检查模块状态','er');document.getElementById('gl').innerHTML='<div class="emp"><div class="em">😿</div><div class="tx">服务未启动</div></div>'})
 }
 
@@ -210,10 +210,10 @@ function doDel(al){
 }
 
 // AI
-function aiOpen(){document.getElementById('aip').classList.add('on');document.querySelector('.fab').style.display='none';api('ai/config',{action:'get'},function(d){if(d.configured){aiOk=true;document.getElementById('aicf').classList.remove('on')}else{aiOk=false;document.getElementById('aicf').classList.add('on')}})}
+function aiOpen(){document.getElementById('aip').classList.add('on');document.querySelector('.fab').style.display='none';api('ai/config',{op:'get'},function(d){if(d.configured){aiOk=true;document.getElementById('aicf').classList.remove('on')}else{aiOk=false;document.getElementById('aicf').classList.add('on')}})}
 function aiClose(){document.getElementById('aip').classList.remove('on');document.querySelector('.fab').style.display='flex'}
-function aiSave(){var k=document.getElementById('aik').value.trim();if(!k){toast('请输入 Key','er');return}api('ai/config',{action:'set',key:k},function(d){if(d.ok){aiOk=true;document.getElementById('aicf').classList.remove('on');toast('已保存','ok');aiAdd('b','配置成功~ 现在可以用自然语言管理账号啦 💕')}else toast(d.error||'失败','er')})}
-function aiDelCfg(){cfShow('清除配置','确认清除 API Key？',function(){api('ai/config',{action:'delete'},function(d){aiOk=false;document.getElementById('aik').value='';toast('已清除','ok')})})}
+function aiSave(){var k=document.getElementById('aik').value.trim();if(!k){toast('请输入 Key','er');return}api('ai/config',{op:'set',key:k},function(d){if(d.ok){aiOk=true;document.getElementById('aicf').classList.remove('on');toast('已保存','ok');aiAdd('b','配置成功~ 现在可以用自然语言管理账号啦 💕')}else toast(d.error||'失败','er')})}
+function aiDelCfg(){cfShow('清除配置','确认清除 API Key？',function(){api('ai/config',{op:'delete'},function(d){aiOk=false;document.getElementById('aik').value='';toast('已清除','ok')})})}
 function aiAdd(r,c,e){var ch=document.getElementById('ach');var d=document.createElement('div');d.className='abb '+(r==='u'?'u':(e?'e':'b'));d.innerHTML=c.replace(/\n/g,'<br>');ch.appendChild(d);ch.scrollTop=ch.scrollHeight}
 function aiSend(){var i=document.getElementById('ait');var m=i.value.trim();if(!m)return;i.value='';aiAdd('u',m);if(!aiOk){aiAdd('b','请先点击 ⚙ 配置 API Key',true);return}aiTyping();api('ai/chat',{msg:m},function(d){aiHideTyping();if(d.error){aiAdd('b','错误: '+d.error,true);return}if(d.choices&&d.choices[0]&&d.choices[0].message){var r=d.choices[0].message.content;aiAdd('b',r);aiPCmd(r)}else aiAdd('b','返回异常',true)})}
 function aiTyping(){var ch=document.getElementById('ach');var d=document.createElement('div');d.id='ty';d.innerHTML='<div class="abb b" style="color:#C0B8C8;font-size:11px">思考中...</div>';ch.appendChild(d);ch.scrollTop=ch.scrollHeight}
