@@ -30,7 +30,10 @@ start_web() {
     cp "$QIUHE_HOME/lib/common.sh" "$WEB_DIR/" 2>/dev/null
     cp "$QIUHE_HOME/lib/ai.sh" "$WEB_DIR/" 2>/dev/null
 
-    chmod 755 "$WEB_DIR/api.sh"
+    # 创建 CGI 入口
+    mkdir -p "$WEB_DIR/cgi-bin" 2>/dev/null
+    cp "$WEB_DIR/api.sh" "$WEB_DIR/cgi-bin/api" 2>/dev/null
+    chmod 755 "$WEB_DIR/api.sh" "$WEB_DIR/cgi-bin/api" 2>/dev/null
 
     echo ""
     log_info "=========================================="
@@ -42,7 +45,7 @@ start_web() {
     log_info "=========================================="
     echo ""
 
-    busybox httpd -f -p "$PORT" -h "$WEB_DIR" -c "$WEB_DIR/api.sh"
+    busybox httpd -f -p "$PORT" -h "$WEB_DIR"
 }
 
 start_web

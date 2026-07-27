@@ -56,9 +56,10 @@ get_param() {
 check_root
 detect_env
 
-# 解析路径
+# 解析路径 (兼容 /api/xxx 和 /cgi-bin/api/xxx)
 _path="$PATH_INFO"
 _action="${_path#/api/}"
+[ "$_action" = "$_path" ] && _action="${_path#/}"
 _action="${_action%%\?*}"
 
 case "$_action" in

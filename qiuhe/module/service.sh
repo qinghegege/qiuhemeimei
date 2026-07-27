@@ -24,6 +24,11 @@ cp -f "$SCRIPT_DIR/lib/detect.sh"  "$WEB_DIR/" 2>/dev/null
 cp -f "$SCRIPT_DIR/lib/switch.sh"  "$WEB_DIR/" 2>/dev/null
 cp -f "$SCRIPT_DIR/lib/ai.sh"      "$WEB_DIR/" 2>/dev/null
 
+# 创建 CGI 目录
+mkdir -p "$WEB_DIR/cgi-bin" 2>/dev/null
+cp -f "$WEB_DIR/api.sh" "$WEB_DIR/cgi-bin/api" 2>/dev/null
+chmod 755 "$WEB_DIR/cgi-bin/api" 2>/dev/null
+
 while [ "$(getprop sys.boot_completed)" != "1" ]; do
     sleep 2
 done
@@ -41,7 +46,7 @@ done
 [ -z "$_BUSYBOX" ] && _BUSYBOX="$(command -v busybox 2>/dev/null)"
 
 if [ -n "$_BUSYBOX" ]; then
-    "$_BUSYBOX" httpd -f -p "$API_PORT" -h "$WEB_DIR" -c "$WEB_DIR/api.sh" \
+    "$_BUSYBOX" httpd -f -p "$API_PORT" -h "$WEB_DIR" \
         >> "$DATA_DIR/logs/httpd.log" 2>&1 &
     echo "[qinghe] HTTP API started on port $API_PORT" >> "$DATA_DIR/logs/boot.log"
 else
