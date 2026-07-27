@@ -155,15 +155,14 @@ apply_account() {
     unset IFS
 
     # 修复文件权限
-    fix_permissions "$_pkg"
+    fix_permissions "$_game_data"
 
     return 0
 }
 
 # 修复文件权限和 SELinux 上下文
 fix_permissions() {
-    _pkg="$1"
-    _game_data="$(get_game_data "$_pkg")"
+    _game_data="$1"
 
     if [ ! -d "$_game_data" ]; then
         return 1
@@ -214,7 +213,7 @@ rollback() {
     unset IFS
 
     _pkg="$(get_pkg_name "$_game_name")"
-    fix_permissions "$_pkg"
+    fix_permissions "$_game_data"
     log_ok "回滚完成"
 }
 

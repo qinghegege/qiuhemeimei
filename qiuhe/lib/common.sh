@@ -4,10 +4,12 @@
 #===============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-if echo "$SCRIPT_DIR" | grep -q '/lib$'; then
-    QIUHE_HOME="$(dirname "$SCRIPT_DIR")"
-else
-    QIUHE_HOME="$SCRIPT_DIR"
+if [ -z "$QIUHE_HOME" ]; then
+    if echo "$SCRIPT_DIR" | grep -q '/lib$'; then
+        QIUHE_HOME="$(dirname "$SCRIPT_DIR")"
+    else
+        QIUHE_HOME="$SCRIPT_DIR"
+    fi
 fi
 
 # --- 日志 ---

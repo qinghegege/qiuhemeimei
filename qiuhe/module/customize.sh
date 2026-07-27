@@ -50,6 +50,7 @@ cat > "$MODDIR/system/bin/qh" << 'EOF'
 #!/system/bin/sh
 export QH_DATA_DIR="/data/qinghe"
 SCRIPT_DIR="/data/adb/qinghe"
+export QIUHE_HOME="$SCRIPT_DIR"
 . "$SCRIPT_DIR/lib/common.sh"
 . "$SCRIPT_DIR/lib/games.sh"
 . "$SCRIPT_DIR/lib/crypto.sh"

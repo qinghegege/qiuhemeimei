@@ -9,6 +9,7 @@ API_DIR="$(cd "$(dirname "$0")" && pwd)"
 MODDIR="$(dirname "$(dirname "$API_DIR")")"
 WEB_DIR="$MODDIR/webroot"
 export QH_DATA_DIR="${QH_DATA_DIR:-}"
+export QIUHE_HOME="$MODDIR"
 
 # 加载库
 . "$MODDIR/lib/common.sh" 2>/dev/null || . "$WEB_DIR/common.sh" 2>/dev/null
