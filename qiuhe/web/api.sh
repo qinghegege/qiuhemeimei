@@ -118,7 +118,7 @@ case "$_action" in
     ai/chat)
         _msg="$(getp msg "")"
         [ -z "$_msg" ] && { respond_err "需要 msg"; exit 1; }
-        _resp="$(ai_chat "$_msg" 2>/dev/null)"
+        _resp="$(ai_chat "$_msg")"
         [ -z "$_resp" ] && { respond_err "AI 请求失败或 Key 未配置"; exit 1; }
         respond "$_resp"
         ;;

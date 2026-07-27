@@ -20,7 +20,7 @@ save_ai_config() {
     _cfg="$(_ai_cfg)"
     printf 'AI_API_KEY="%s"\n' "$1" > "$_cfg"
     printf 'AI_MODEL="%s"\n' "$AI_MODEL" >> "$_cfg"
-    chmod 600 "$_cfg"
+    chmod 644 "$_cfg"
 }
 
 # JSON 字符串转义
@@ -61,12 +61,13 @@ ai_chat() {
 
     load_ai_config
     if [ -z "$AI_API_KEY" ]; then
-        echo '{"error":"api_key_not_configured"}'
+        _cfg="$(_ai_cfg)"
+        echo "{\"error\":\"api_key_not_configured\",\"hint\":\"配置文件: $_cfg\"}"
         return 1
     fi
 
     if ! command -v curl >/dev/null 2>&1; then
-        echo '{"error":"curl_not_available"}'
+        echo '{"error":"curl_not_available","hint":"请安装 curl"}'
         return 1
     fi
 
@@ -120,6 +121,11 @@ ai_set_key() {
     if [ -n "$_key" ]; then
         load_ai_config
         save_ai_config "$_key"
+        # 验证写入
+        _cfg="$(_ai_cfg)"
+        if [ -f "$_cfg" ] && grep -q "AI_API_KEY" "$_cfg" 2>/dev/null; then
+            AI_API_KEY="$_key"
+        fi
     fi
 }
 
