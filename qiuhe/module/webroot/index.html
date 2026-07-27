@@ -125,7 +125,11 @@ function showManual(el){
   el.innerHTML=h
 }
 
-function manualGame(nm,dp){var pt=prompt(dp+' 数据路径:');if(!pt||!pt.trim())return;pt=pt.trim();openGame(nm,dp,'—',pt,false)}
+function manualGame(nm,dp){
+  var def='',g;for(var i=0;i<ALL_GAMES.length;i++){if(ALL_GAMES[i].name===nm){g=ALL_GAMES[i];def=g.path;break}}
+  var h=g?('包名: '+g.pkg+'\n默认路径:\n'+def+'\n\n确认或修改后点确定'):'输入数据路径';
+  var pt=prompt(dp+' '+h,def);if(!pt||!pt.trim())return;pt=pt.trim();openGame(nm,dp,'—',pt,false)
+}
 
 function renderGames(d,el){
   var gs=d.games||[],i=gs.filter(function(g){return g.installed}),n=gs.filter(function(g){return !g.installed}),h='';
