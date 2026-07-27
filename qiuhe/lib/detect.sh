@@ -59,35 +59,45 @@ detect_games() {
     return 0
 }
 
-# 获取完整检测结果列表（JSON-ready, 供 API 使用）
+# 极速检测 — 缓存所有 pm 输出, 跳过 du 扫描
 detect_all_entries() {
     _entries=""
+    _all_pkg="$(pm list packages 2>/dev/null)"
     _clone_users="$(pm list users 2>/dev/null | sed -n 's/.*UserInfo{\([0-9]*\).*/\1/p' | grep -v '^0$')"
+    # 预缓存分身用户包列表
+    _clone_pkgs=""
+    for _uid in $_clone_users; do
+        _up="$(pm list packages --user "$_uid" 2>/dev/null)"
+        _clone_pkgs="$_clone_pkgs
+$_uid:$_up"
+    done
 
     while IFS='|' read -r _name _pkg _path _subdirs; do
         [ -z "$_name" ] && continue
         _display="$(get_display_name "$_name")"
 
-        # 正式版
-        if pm list packages 2>/dev/null | grep -q "package:${_pkg}"; then
-            _size="$(dir_size "$_path")"
-            _entry="{\"name\":\"$_name\",\"display\":\"$_display\",\"pkg\":\"$_pkg\",\"path\":\"$_path\",\"installed\":true,\"size\":\"$_size\",\"clone\":false}"
+        # 正式版 — 使用预缓存列表
+        if echo "$_all_pkg" | grep -q "package:${_pkg}"; then
+            _has_dir="false"
+            [ -d "$_path" ] && _has_dir="true"
+            _entry="{\"name\":\"$_name\",\"display\":\"$_display\",\"pkg\":\"$_pkg\",\"path\":\"$_path\",\"installed\":true,\"size\":\"—\",\"clone\":false}"
             [ -n "$_entries" ] && _entries="$_entries,"
             _entries="${_entries}${_entry}"
         fi
 
-        # 分身版
+        # 分身版 — 使用预缓存列表
         for _uid in $_clone_users; do
-            _user_pkg="$(pm list packages --user "$_uid" 2>/dev/null | grep "package:${_pkg}" | head -1)"
-            if [ -n "$_user_pkg" ]; then
-                _clone_path="/data/user/${_uid}/${_pkg}"
-                [ -d "$_clone_path" ] || _clone_path="/data/user_de/${_uid}/${_pkg}"
-                if [ -d "$_clone_path" ]; then
-                    _csize="$(dir_size "$_clone_path")"
-                    _centry="{\"name\":\"$_name\",\"display\":\"$_display · 分身\",\"pkg\":\"$_pkg\",\"path\":\"$_clone_path\",\"installed\":true,\"size\":\"$_csize\",\"clone\":true}"
-                    [ -n "$_entries" ] && _entries="$_entries,"
-                    _entries="${_entries}${_centry}"
-                fi
+            _userline="$(echo "$_clone_pkgs" | grep "^${_uid}:" | head -1)"
+            if echo "${_userline#*:}" | grep -q "package:${_pkg}"; then
+                for _pref in /data/user /data/user_de; do
+                    _cp="${_pref}/${_uid}/${_pkg}"
+                    if [ -d "$_cp" ]; then
+                        _centry="{\"name\":\"$_name\",\"display\":\"$_display · 分身\",\"pkg\":\"$_pkg\",\"path\":\"$_cp\",\"installed\":true,\"size\":\"—\",\"clone\":true}"
+                        [ -n "$_entries" ] && _entries="$_entries,"
+                        _entries="${_entries}${_centry}"
+                        break
+                    fi
+                done
             fi
         done
     done < "$GAMES_INI"

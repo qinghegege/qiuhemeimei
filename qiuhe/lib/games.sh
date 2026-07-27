@@ -53,20 +53,16 @@ find_name_by_pkg() {
     grep "|${_pkg}|" "$GAMES_INI" 2>/dev/null | head -1 | cut -d'|' -f1
 }
 
-# 获取游戏显示名（友好名称）
+# 获取游戏显示名
 get_display_name() {
     _name="$1"
     case "$_name" in
-        sgame)  echo "王者荣耀" ;;
-        pubgm)  echo "和平精英" ;;
-        cf)     echo "CF手游" ;;
-        speed)  echo "QQ飞车" ;;
-        cod)    echo "使命召唤手游" ;;
-        jkchess) echo "金铲铲之战" ;;
-        lolm)   echo "英雄联盟手游" ;;
-        kihan)  echo "火影忍者" ;;
-        wuxia)  echo "天涯明月刀" ;;
-        *)      echo "$_name" ;;
+        sgame)    echo "王者荣耀" ;;
+        pubgm)    echo "和平精英" ;;
+        cf)       echo "CF手游" ;;
+        dfm)      echo "三角洲行动" ;;
+        valorant) echo "无畏契约" ;;
+        *)        echo "$_name" ;;
     esac
 }
 
