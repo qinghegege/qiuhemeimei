@@ -3,21 +3,24 @@
 # 腾讯手游账号本地切换器 - DeepSeek AI 模块
 #===============================================================================
 
-AI_CONFIG="$DATA_DIR/ai.conf"
 AI_API_URL="https://api.deepseek.com/v1/chat/completions"
 
+_ai_cfg() { echo "${DATA_DIR:-/data/qinghe}/ai.conf"; }
+
 load_ai_config() {
-    if [ -f "$AI_CONFIG" ]; then
-        . "$AI_CONFIG"
+    _cfg="$(_ai_cfg)"
+    if [ -f "$_cfg" ]; then
+        . "$_cfg"
     fi
     AI_API_KEY="${AI_API_KEY:-}"
     AI_MODEL="${AI_MODEL:-deepseek-chat}"
 }
 
 save_ai_config() {
-    printf 'AI_API_KEY="%s"\n' "$1" > "$AI_CONFIG"
-    printf 'AI_MODEL="%s"\n' "$AI_MODEL" >> "$AI_CONFIG"
-    chmod 600 "$AI_CONFIG"
+    _cfg="$(_ai_cfg)"
+    printf 'AI_API_KEY="%s"\n' "$1" > "$_cfg"
+    printf 'AI_MODEL="%s"\n' "$AI_MODEL" >> "$_cfg"
+    chmod 600 "$_cfg"
 }
 
 # JSON 字符串转义
@@ -105,4 +108,21 @@ ai_status() {
     else
         echo "{\"configured\":false,\"model\":\"$AI_MODEL\"}"
     fi
+}
+
+ai_is_configured() {
+    load_ai_config
+    [ -n "$AI_API_KEY" ] && echo "true" || echo "false"
+}
+
+ai_set_key() {
+    _key="$1"
+    if [ -n "$_key" ]; then
+        load_ai_config
+        save_ai_config "$_key"
+    fi
+}
+
+ai_clear_config() {
+    rm -f "$(_ai_cfg)"
 }

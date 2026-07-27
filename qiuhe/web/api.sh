@@ -25,6 +25,7 @@ ensure_data_dirs
 json() { echo "$1"; }
 json_ok() { json "{\"ok\":true}"; }
 json_err() { json "{\"error\":\"$1\"}" >&2; json "{\"error\":\"$1\"}"; }
+respond_ok() { respond '{"ok":true}'; }
 
 # === HTTP 模式: 从 query string / POST body 取参 ===
 http_get_param() {
