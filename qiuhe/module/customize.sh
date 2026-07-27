@@ -139,11 +139,20 @@ cp -f "$MODDIR/lib/detect.sh"   "$MODDIR/webroot/" 2>/dev/null || true
 cp -f "$MODDIR/lib/switch.sh"   "$MODDIR/webroot/" 2>/dev/null || true
 cp -f "$MODDIR/lib/ai.sh"       "$MODDIR/webroot/" 2>/dev/null || true
 
+# 查找 busybox (兼容 busybox-ndk 非标准路径)
+_BUSYBOX=""
+for _p in /system/xbin/busybox /system/bin/busybox \
+          /data/adb/modules/busybox-ndk/system/xbin/busybox \
+          /data/adb/modules/busybox-ndk/system/bin/busybox; do
+    [ -x "$_p" ] && _BUSYBOX="$_p" && break
+done
+[ -z "$_BUSYBOX" ] && _BUSYBOX="$(command -v busybox 2>/dev/null)"
+
 # 安装后立即启动后台服务，无需重启
-if command -v busybox >/dev/null 2>&1; then
+if [ -n "$_BUSYBOX" ]; then
     pkill -f "busybox httpd.*8848" 2>/dev/null
     sleep 1
-    busybox httpd -f -p 8848 -h "$MODDIR/webroot" -c "$MODDIR/webroot/api.sh" \
+    "$_BUSYBOX" httpd -f -p 8848 -h "$MODDIR/webroot" -c "$MODDIR/webroot/api.sh" \
         >> "$DATA_DIR/logs/httpd.log" 2>&1 &
     ui_print "- Web UI 已启动: http://127.0.0.1:8848"
 else

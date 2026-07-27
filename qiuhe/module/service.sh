@@ -31,8 +31,17 @@ done
 pkill -f "busybox httpd.*8848" 2>/dev/null
 sleep 1
 
-if command -v busybox >/dev/null 2>&1; then
-    busybox httpd -f -p "$API_PORT" -h "$WEB_DIR" -c "$WEB_DIR/api.sh" \
+# 查找 busybox
+_BUSYBOX=""
+for _p in /system/xbin/busybox /system/bin/busybox \
+          /data/adb/modules/busybox-ndk/system/xbin/busybox \
+          /data/adb/modules/busybox-ndk/system/bin/busybox; do
+    [ -x "$_p" ] && _BUSYBOX="$_p" && break
+done
+[ -z "$_BUSYBOX" ] && _BUSYBOX="$(command -v busybox 2>/dev/null)"
+
+if [ -n "$_BUSYBOX" ]; then
+    "$_BUSYBOX" httpd -f -p "$API_PORT" -h "$WEB_DIR" -c "$WEB_DIR/api.sh" \
         >> "$DATA_DIR/logs/httpd.log" 2>&1 &
     echo "[qinghe] HTTP API started on port $API_PORT" >> "$DATA_DIR/logs/boot.log"
 else
