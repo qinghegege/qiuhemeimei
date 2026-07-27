@@ -83,8 +83,9 @@ account_backup() {
     fi
 
     mkdir -p "$_data_dir"
-
     check_disk_space "$_acct_dir" 100 || return 1
+
+    selinux_temp_disable
 
     # 完整备份: tar 打包所有数据 (排除 cache/code_cache/lib)
     _tar_err="/tmp/qh_backup_err_$$"
@@ -95,6 +96,7 @@ account_backup() {
         rm -f "$_tar_err"
         log_err "备份失败: ${_err_msg:-未知错误}"
         rm -rf "$_acct_dir"
+        selinux_restore
         return 1
     fi
 
@@ -119,6 +121,7 @@ EOF
     log_info "  游戏: $_display"
     log_info "  路径: $_acct_dir"
     log_info "  大小: $_size"
+    selinux_restore
     return 0
 }
 

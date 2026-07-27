@@ -38,6 +38,7 @@ backup_current() {
 
     mkdir -p "$_snapshot_dir"
 
+    selinux_temp_disable
     _tar_err="/tmp/qh_snap_$$"
     if (cd "$_game_data" && tar cf - --exclude='./cache' --exclude='./code_cache' --exclude='./lib' . 2>"$_tar_err") | (cd "$_snapshot_dir" && tar xf - 2>>"$_tar_err"); then
         rm -f "$_tar_err"
@@ -46,8 +47,10 @@ backup_current() {
         rm -f "$_tar_err"
         log_err "快照创建失败: ${_err_msg:-未知错误}"
         rm -rf "$_snapshot_dir"
+        selinux_restore
         return 1
     fi
+    selinux_restore
 
     _snap_meta="$_snapshot_dir/snapshot.json"
 
@@ -118,16 +121,19 @@ apply_account() {
 
     if [ "$_method" = "full" ]; then
         # 完整恢复: 清空目标目录 (保留目录本身和 lib 软链), tar 全覆盖写入
+        selinux_temp_disable
         find "$_game_data" -mindepth 1 -maxdepth 1 ! -name lib -exec rm -rf {} + 2>/dev/null
 
         _tar_err="/tmp/qh_apply_$$"
         if (cd "$_data_dir" && tar cf - . 2>"$_tar_err") | (cd "$_game_data" && tar xf - 2>>"$_tar_err"); then
             rm -f "$_tar_err"
+            selinux_restore
             fix_permissions "$_game_data"
             return 0
         else
             _err_msg="$(head -3 "$_tar_err" 2>/dev/null)"
             rm -f "$_tar_err"
+            selinux_restore
             log_err "完整恢复失败: ${_err_msg:-未知错误}"
             return 1
         fi
@@ -212,6 +218,7 @@ rollback() {
     _method="$(grep '"backup_method"' "$_snap_meta" 2>/dev/null | head -1 | sed 's/.*"backup_method": *"//' | sed 's/".*//')"
 
     if [ "$_method" = "full" ]; then
+        selinux_temp_disable
         find "$_game_data" -mindepth 1 -maxdepth 1 ! -name lib -exec rm -rf {} + 2>/dev/null
         _tar_err="/tmp/qh_roll_$$"
         if (cd "$_snapshot_dir" && tar cf - . 2>"$_tar_err") | (cd "$_game_data" && tar xf - 2>>"$_tar_err"); then
@@ -219,8 +226,10 @@ rollback() {
         else
             _err_msg="$(head -3 "$_tar_err" 2>/dev/null)"
             rm -f "$_tar_err"
+            selinux_restore
             log_err "回滚写入失败: ${_err_msg:-未知错误}"; return 1
         fi
+        selinux_restore
     else
         # 旧格式兼容
         _subdirs="$(grep '"subdirs"' "$_snap_meta" 2>/dev/null | head -1 | sed 's/.*"subdirs": *"//' | sed 's/".*//')"

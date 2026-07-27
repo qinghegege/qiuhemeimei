@@ -139,7 +139,7 @@ case "$_action" in
         ;;
     status)
         _se="$(getenforce 2>/dev/null || echo 'unknown')"
-        respond "{\"ok\":true,\"version\":\"v2.1.4\",\"dataDir\":\"$DATA_DIR\",\"selinux\":\"$_se\"}"
+        respond "{\"ok\":true,\"version\":\"v2.1.5\",\"dataDir\":\"$DATA_DIR\",\"selinux\":\"$_se\"}"
         ;;
     *)  respond_err "未知接口: $_action" ;;
 esac

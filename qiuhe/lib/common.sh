@@ -46,6 +46,23 @@ check_dependencies() {
     command -v restorecon >/dev/null 2>&1 || HAS_RESTORECON=false
 }
 
+# --- SELinux 临时关闭 ---
+_SELINUX_SAVED=""
+
+selinux_temp_disable() {
+    _SELINUX_SAVED="$(getenforce 2>/dev/null)"
+    if [ "$_SELINUX_SAVED" = "Enforcing" ]; then
+        setenforce 0 2>/dev/null && log_info "SELinux 临时关闭" || log_warn "无法修改 SELinux 状态"
+    fi
+}
+
+selinux_restore() {
+    if [ -n "$_SELINUX_SAVED" ] && [ "$_SELINUX_SAVED" = "Enforcing" ]; then
+        setenforce 1 2>/dev/null && log_info "SELinux 已恢复" || log_warn "无法恢复 SELinux 状态"
+    fi
+    _SELINUX_SAVED=""
+}
+
 # --- 查找 busybox (兼容 busybox-ndk 等非标准路径) ---
 find_busybox() {
     for _p in /system/xbin/busybox /system/bin/busybox \
