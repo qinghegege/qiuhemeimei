@@ -74,6 +74,35 @@ detect_all_entries() {
     echo "$_entries"
 }
 
+# 单款游戏路径检测: 返回主应用 + 分身路径 JSON
+detect_game_paths() {
+    _name="$1"
+    _pkg="$(get_pkg_name "$_name")"
+    _main="$(get_pkg_data_path "$_name")"
+    _display="$(get_display_name "$_name")"
+
+    _paths="{\"name\":\"$_name\",\"display\":\"$_display\",\"pkg\":\"$_pkg\","
+    _has_main="false"
+    [ -d "$_main" ] && _has_main="true"
+    _paths="${_paths}\"main\":{\"exists\":$_has_main,\"path\":\"$_main\"}"
+
+    _clones=""
+    for _pref in /data/user /data/user_de; do
+        for _d in "$_pref"/*/ 2>/dev/null; do
+            [ -d "$_d" ] || continue
+            _uid="$(basename "$_d")"
+            [ "$_uid" = "0" ] && continue
+            _cp="${_d}${_pkg}"
+            if [ -d "$_cp" ]; then
+                [ -n "$_clones" ] && _clones="$_clones,"
+                _clones="${_clones}{\"uid\":\"$_uid\",\"path\":\"$_cp\"}"
+            fi
+        done
+    done
+    _paths="${_paths},\"clones\":[${_clones}]}"
+    echo "$_paths"
+}
+
 # 检测单款游戏是否存在（含分身）
 check_game_installed() {
     _name="$1"

@@ -37,14 +37,9 @@ account_backup() {
     _pkg="$(get_pkg_name "$_game_name")"
     if [ -z "$_pkg" ]; then
         log_err "未知游戏: $_game_name"
-        log_info "可用游戏:"
-        list_all_games | while IFS='|' read -r n p _ _; do
-            echo "  $n ($(get_display_name "$n"))"
-        done
         return 1
     fi
 
-    # 支持自定义路径（分身版等）
     if [ -n "$_custom_path" ]; then
         _game_data="$_custom_path"
     else
@@ -56,44 +51,44 @@ account_backup() {
         return 1
     fi
 
+    # 检测游戏进程
+    if [ "$HAS_PGREP" = true ]; then
+        if pgrep -f "$_pkg" >/dev/null 2>&1; then
+            _display="$(get_display_name "$_game_name")"
+            log_err "$_display 正在运行，请先关闭游戏"
+            return 1
+        fi
+    fi
+
     _acct_dir="$(_get_account_dir "$_game_name" "$_alias")"
     _meta="$(_get_meta_path "$_acct_dir")"
     _data_dir="$(_get_data_path "$_acct_dir")"
 
     if [ -f "$_meta" ]; then
         log_warn "账号 '$_alias' 已存在"
-        printf "是否覆盖? [y/N]: "
-        read -r _confirm
-        case "$_confirm" in
-            [Yy]*) log_info "将覆盖已有账号" ;;
-            *) log_info "已取消"; return 0 ;;
-        esac
+        if [ -t 0 ]; then
+            printf "是否覆盖? [y/N]: "
+            read -r _confirm
+            case "$_confirm" in
+                [Yy]*) log_info "将覆盖已有账号" ;;
+                *) log_info "已取消"; return 0 ;;
+            esac
+        fi
         rm -rf "$_acct_dir"
     fi
 
-    mkdir -p "$_acct_dir" "$_data_dir"
+    mkdir -p "$_data_dir"
 
-    _subdirs="$(get_pkg_subdirs "$_game_name")"
-    _backup_count=0
+    check_disk_space "$_acct_dir" 100 || return 1
 
-    IFS=','
-    for _subdir in $_subdirs; do
-        _subdir="$(echo "$_subdir" | tr -d ' ')"
-        _src="$_game_data/$_subdir"
-        _dst="$_data_dir/$_subdir"
-
-        if [ -d "$_src" ]; then
-            cp -r "$_src" "$_dst" 2>/dev/null
-            if [ $? -eq 0 ]; then
-                _backup_count=$(( _backup_count + 1 ))
-            else
-                log_warn "复制 $_subdir 失败"
-            fi
-        else
-            log_warn "子目录不存在, 跳过: $_subdir"
-        fi
-    done
-    unset IFS
+    # 完整备份: tar 打包所有数据 (排除 cache/code_cache/lib)
+    if (cd "$_game_data" && tar cf - --exclude='./cache' --exclude='./code_cache' --exclude='./lib' . 2>/dev/null) | (cd "$_data_dir" && tar xf - 2>/dev/null); then
+        :
+    else
+        log_err "备份失败"
+        rm -rf "$_acct_dir"
+        return 1
+    fi
 
     _display="$(get_display_name "$_game_name")"
     _now="$(date '+%Y-%m-%d %H:%M:%S')"
@@ -107,8 +102,8 @@ account_backup() {
     "alias": "$_alias",
     "created_at": "$_now",
     "data_size": "$_size",
-    "backup_subdirs": "$_subdirs",
-    "data_path": "$_game_data"
+    "data_path": "$_game_data",
+    "backup_method": "full"
 }
 EOF
 
@@ -217,9 +212,10 @@ account_info() {
 # 删除账号存档
 account_delete() {
     _alias="$1"
+    _force="${2:-0}"
 
     if [ -z "$_alias" ]; then
-        log_err "用法: delete <账号别名>"
+        log_err "用法: delete <账号别名> [--force]"
         return 1
     fi
 
@@ -242,11 +238,13 @@ account_delete() {
             echo "  路径: $_acct_dir"
             echo ""
 
-            printf "确认删除? 输入 yes 确认: "
-            read -r _confirm
-            if [ "$_confirm" != "yes" ]; then
-                log_info "已取消删除"
-                return 0
+            if [ "$_force" != "1" ]; then
+                printf "确认删除? 输入 yes 确认: "
+                read -r _confirm </dev/tty 2>/dev/null || _confirm=""
+                if [ "$_confirm" != "yes" ]; then
+                    log_info "已取消删除"
+                    return 0
+                fi
             fi
 
             rm -rf "$_acct_dir"

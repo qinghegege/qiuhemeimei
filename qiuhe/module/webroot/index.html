@@ -60,6 +60,10 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:linear-gr
 .tst.ok{background:#98D8C8;color:#fff}
 .tst.er{background:#FF8A80;color:#fff}
 .tst.in{background:rgba(0,0,0,0.75);color:#fff}
+
+.ps{background:#fff;border-radius:12px;padding:14px;margin-bottom:8px;border:1px solid #FFE4EC}
+.ps .pt{font-size:13px;font-weight:600;color:#5D4E5F}
+.ps .pp{font-size:10px;color:#B8A9C6;margin:2px 0 6px;word-break:break-all}
 </style>
 </head>
 <body>
@@ -76,7 +80,7 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:linear-gr
   </div>
 </div>
 
-<div class="mo" id="mo"><div class="md" id="md"></div></div>
+<div class="mo" id="mo" onclick="if(event.target===this)document.getElementById('mo').classList.remove('on')"><div class="md" id="md"></div></div>
 <div class="cf" id="cfo"><div class="cb"><h3 id="cft"></h3><p id="cfm"></p><div class="cr"><button class="btn bw" style="flex:1;margin:0" onclick="cfClose(false)">取消</button><button class="btn bp" style="flex:1;margin:0" id="cfk">确认</button></div></div></div>
 <div id="t" class="tst"></div>
 
@@ -110,6 +114,7 @@ var ALL_GAMES=[
   {name:'valorant',display:'无畏契约',pkg:'com.tencent.tmgp.valorant',path:'/data/data/com.tencent.tmgp.valorant'}
 ];
 
+var _pths=null;
 var _detectDone=false;
 
 function loadGames(){
@@ -150,26 +155,46 @@ function back(){document.getElementById('pd').classList.remove('on');document.ge
 
 function loadDetail(){
   var ct=document.getElementById('dc');ct.innerHTML='<div class="ld"><div class="sp"></div><div class="lt">加载中...</div></div>';
-  api('accounts',{game:cg},function(d){
-    var ac=d.accounts||[],h='';
-    h+='<button class="btn bp" onclick="doBackup()">📦 备份当前账号</button>';
-    h+='<div class="as"><div class="ast">📋 已备份账号 ('+ac.length+')</div>';
-    if(!ac.length)h+='<div class="emp"><div class="em">📭</div><div class="tx">还没有备份过账号</div></div>';
-    else ac.forEach(function(a){h+='<div class="ai"><div class="ail"><div class="aan">'+a.alias+'</div><div class="aam">'+a.time+' · '+a.size+'</div></div><div class="aia"><button class="btn bm bsm" onclick="doSwitch(\''+a.alias+'\')">切换</button><button class="btn bc bsm" onclick="doDel(\''+a.alias+'\')">删除</button></div></div>'});
+  _pths=null;
+  // 并行加载路径检测 + 账号列表
+  var _done=0;
+  function _tryRender(){_done++;if(_done<2)return;
+    var h='';
+    // 路径区块
+    if(_pths&&(_pths.main.exists||_pths.clones.length)){
+      h+='<div style="font-size:12px;color:#B8A9C6;font-weight:600;margin-bottom:6px">备份数据源</div>';
+      if(_pths.main.exists)h+='<div class="ps"><div class="pt">主应用</div><div class="pp">'+_pths.main.path+'</div><button class="btn bp bsm" onclick="startBackup(\''+_pths.main.path+'\')">备份主应用</button></div>';
+      _pths.clones.forEach(function(c){h+='<div class="ps"><div class="pt">分身 · 用户'+c.uid+'</div><div class="pp">'+c.path+'</div><button class="btn bp bsm" onclick="startBackup(\''+c.path+'\')">备份分身</button></div>'});
+    }else{
+      h+='<div class="ps"><div class="pt">未检测到游戏数据</div><div class="pp">游戏可能未安装或路径异常</div><button class="btn bp bsm" onclick="manualGame(cg,cgd)">手动指定路径</button></div>';
+    }
+    // 账号列表
+    h+='<div class="as"><div class="ast">已备份账号 ('+(_accts||[]).length+')</div>';
+    if(!_accts.length)h+='<div class="emp"><div class="em">📭</div><div class="tx">还没有备份过账号</div></div>';
+    else _accts.forEach(function(a){h+='<div class="ai"><div class="ail"><div class="aan">'+a.alias+'</div><div class="aam">'+a.time+' · '+a.size+'</div></div><div class="aia"><button class="btn bm bsm" onclick="doRestore(\''+a.alias+'\')">恢复</button><button class="btn bc bsm" onclick="doDel(\''+a.alias+'\')">删除</button></div></div>'});
     h+='</div>';ct.innerHTML=h
-  })
+  }
+  api('detect_game',{name:cg},function(d){_pths=d;_tryRender()});
+  var _accts=[];
+  api('accounts',{game:cg},function(d){_accts=d.accounts||[];_tryRender()})
 }
 
-function doBackup(){
-  var a=prompt('💕 为当前账号取个名字:');if(!a||!a.trim())return;a=a.trim();
+function startBackup(pt){
+  document.getElementById('md').innerHTML='<h3>备份当前账号</h3><p style="font-size:10px;color:#B8A9C6;word-break:break-all;margin-bottom:10px">路径: '+pt+'</p><input id="bakn" placeholder="自定义名称 (如: 大号、小号)" style="width:100%;padding:10px 12px;border:2px solid #FFE4EC;border-radius:10px;font-size:14px;outline:none;background:#FFF8FA;color:#5D4E5F;margin-bottom:8px"><div style="display:flex;gap:6px"><button class="btn bw" style="flex:1;margin:0" onclick="document.getElementById(\'mo\').classList.remove(\'on\')">取消</button><button class="btn bp" style="flex:1;margin:0" onclick="doBackup(\''+pt+'\')">确认备份</button></div>';
+  document.getElementById('mo').classList.add('on')
+}
+
+function doBackup(pt){
+  var a=document.getElementById('bakn').value.trim();if(!a){toast('请输入名称','er');return}
+  document.getElementById('mo').classList.remove('on');
   document.getElementById('dc').innerHTML='<div class="ld"><div class="sp"></div><div class="lt">正在备份...</div></div>';
-  var bd={game:cg,alias:a};if(cgpt)bd.path=cgpt;api('backup',bd,function(d){if(d.ok){toast('备份成功: '+a,'ok');loadDetail()}else{toast(d.error||'失败','er');loadDetail()}})
+  var bd={game:cg,alias:a};if(pt)bd.path=pt;api('backup',bd,function(d){if(d.ok){toast('备份成功: '+a,'ok');loadDetail()}else{toast(d.error||'失败','er');loadDetail()}})
 }
 
-function doSwitch(al){
-  cfShow('切换账号','确认切换到「'+al+'」？<br>切换前会自动备份当前数据。',function(){
-    document.getElementById('dc').innerHTML='<div class="ld"><div class="sp"></div><div class="lt">正在切换...</div></div>';
-    api('restore',{alias:al},function(d){if(d.ok){toast('已切换: '+al,'ok');loadDetail()}else{toast(d.error||'失败','er');loadDetail()}})
+function doRestore(al){
+  cfShow('恢复账号','确认恢复到「'+al+'」？<br>切换前会自动备份当前数据。',function(){
+    document.getElementById('dc').innerHTML='<div class="ld"><div class="sp"></div><div class="lt">正在恢复...</div></div>';
+    api('restore',{alias:al},function(d){if(d.ok){toast('已恢复: '+al,'ok');loadDetail()}else{toast(d.error||'失败','er');loadDetail()}})
   })
 }
 

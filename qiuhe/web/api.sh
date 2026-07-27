@@ -72,7 +72,7 @@ else
 fi
 
 # 所有日志到 stderr, 保证 stdout 是纯 JSON
-[ "$MODE" = "cgi" ] && check_root
+check_root
 detect_env 2>/dev/null
 
 # --- 路由 ---
@@ -80,6 +80,12 @@ case "$_action" in
     detect)
         _entries="$(detect_all_entries)"
         [ -z "$_entries" ] && respond "{\"games\":[]}" || respond "{\"games\":[$_entries]}"
+        ;;
+    detect_game)
+        _n="$(getp name "")"
+        [ -z "$_n" ] && { respond_err "需要 name"; exit 1; }
+        _r="$(detect_game_paths "$_n")"
+        [ -n "$_r" ] && respond "$_r" || respond_err "游戏不存在"
         ;;
     accounts)
         _game="$(getp game "")"; _found=""; _dir="${ACCOUNTS_DIR}${_game:+/$_game}"
@@ -110,10 +116,10 @@ case "$_action" in
     delete)
         _a="$(getp alias "")"
         [ -z "$_a" ] && { respond_err "需要 alias"; exit 1; }
-        account_delete "$_a" >/dev/null 2>&1 && respond "{\"ok\":true,\"alias\":\"$_a\"}" || respond_err "删除失败"
+        account_delete "$_a" 1 >/dev/null 2>&1 && respond "{\"ok\":true,\"alias\":\"$_a\"}" || respond_err "删除失败"
         ;;
     status)
-        respond "{\"ok\":true,\"version\":\"v2.1.2\",\"dataDir\":\"$DATA_DIR\"}"
+        respond "{\"ok\":true,\"version\":\"v2.1.3\",\"dataDir\":\"$DATA_DIR\"}"
         ;;
     *)  respond_err "未知接口: $_action" ;;
 esac

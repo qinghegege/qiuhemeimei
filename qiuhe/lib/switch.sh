@@ -38,23 +38,13 @@ backup_current() {
 
     mkdir -p "$_snapshot_dir"
 
-    _subdirs="$(get_pkg_subdirs "$_game_name")"
-    _backup_count=0
-
-    IFS=','
-    for _subdir in $_subdirs; do
-        _subdir="$(echo "$_subdir" | tr -d ' ')"
-        _src="$_game_data/$_subdir"
-        _dst="$_snapshot_dir/$_subdir"
-
-        if [ -d "$_src" ]; then
-            cp -r "$_src" "$_dst" 2>/dev/null
-            if [ $? -eq 0 ]; then
-                _backup_count=$(( _backup_count + 1 ))
-            fi
-        fi
-    done
-    unset IFS
+    if (cd "$_game_data" && tar cf - --exclude='./cache' --exclude='./code_cache' --exclude='./lib' . 2>/dev/null) | (cd "$_snapshot_dir" && tar xf - 2>/dev/null); then
+        :
+    else
+        log_err "快照创建失败"
+        rm -rf "$_snapshot_dir"
+        return 1
+    fi
 
     _snap_meta="$_snapshot_dir/snapshot.json"
 
@@ -64,7 +54,7 @@ backup_current() {
     "game": "$_game_name",
     "package": "$_pkg",
     "timestamp": "$_now",
-    "subdirs": "$_subdirs"
+    "backup_method": "full"
 }
 EOF
 
@@ -104,8 +94,8 @@ apply_account() {
     _game="$(grep '"game"' "$_found_meta" | head -1 | sed 's/.*"game": *"//' | sed 's/".*//')"
     _pkg="$(grep '"package"' "$_found_meta" | head -1 | sed 's/.*"package": *"//' | sed 's/".*//')"
     _data_dir="$(_get_data_path "$_acct_dir")"
-    # 读取备份时记录的实际数据路径 (分身版路径可能不同于默认)
     _stored_path="$(grep '"data_path"' "$_found_meta" 2>/dev/null | head -1 | sed 's/.*"data_path": *"//' | sed 's/".*//')"
+    _method="$(grep '"backup_method"' "$_found_meta" 2>/dev/null | head -1 | sed 's/.*"backup_method": *"//' | sed 's/".*//')"
 
     if [ ! -d "$_data_dir" ]; then
         log_err "账号数据目录不存在: $_data_dir"
@@ -123,41 +113,55 @@ apply_account() {
         return 1
     fi
 
-    # 清空游戏数据子目录
-    _subdirs="$(get_pkg_subdirs "$_game")"
-    IFS=','
-    for _subdir in $_subdirs; do
-        _subdir="$(echo "$_subdir" | tr -d ' ')"
-        _target="$_game_data/$_subdir"
-        if [ -d "$_target" ]; then
-            rm -rf "${_target:?}"/*
+    if [ "$_method" = "full" ]; then
+        # 完整恢复: 清空目标目录 (保留目录本身和 lib 软链), tar 全覆盖写入
+        find "$_game_data" -mindepth 1 -maxdepth 1 ! -name lib -exec rm -rf {} + 2>/dev/null
+
+        if (cd "$_data_dir" && tar cf - . 2>/dev/null) | (cd "$_game_data" && tar xf - 2>/dev/null); then
+            fix_permissions "$_game_data"
+            return 0
+        else
+            log_err "完整恢复失败"
+            return 1
         fi
-        mkdir -p "$_target"
-    done
-    unset IFS
+    else
+        # 旧格式兼容 (subdir 备份)
+        _subdirs="$(grep '"backup_subdirs"' "$_found_meta" 2>/dev/null | head -1 | sed 's/.*"backup_subdirs": *"//' | sed 's/".*//')"
+        [ -z "$_subdirs" ] && _subdirs="$(get_pkg_subdirs "$_game")"
 
-    # 写入存档数据
-    IFS=','
-    for _subdir in $_subdirs; do
-        _subdir="$(echo "$_subdir" | tr -d ' ')"
-        _src="$_data_dir/$_subdir"
-        _dst="$_game_data/$_subdir"
-
-        if [ -d "$_src" ]; then
-            rm -rf "${_dst:?}"/*
-            cp -r "$_src"/* "$_dst/" 2>/dev/null
-            if [ $? -ne 0 ]; then
-                log_err "写入 $_subdir 失败"
-                return 1
+        # 清空游戏数据子目录
+        IFS=','
+        for _subdir in $_subdirs; do
+            _subdir="$(echo "$_subdir" | tr -d ' ')"
+            _target="$_game_data/$_subdir"
+            if [ -d "$_target" ]; then
+                rm -rf "${_target:?}"/*
             fi
-        fi
-    done
-    unset IFS
+            mkdir -p "$_target"
+        done
+        unset IFS
 
-    # 修复文件权限
-    fix_permissions "$_game_data"
+        # 写入存档数据 (含隐藏文件)
+        IFS=','
+        for _subdir in $_subdirs; do
+            _subdir="$(echo "$_subdir" | tr -d ' ')"
+            _src="$_data_dir/$_subdir"
+            _dst="$_game_data/$_subdir"
 
-    return 0
+            if [ -d "$_src" ]; then
+                rm -rf "${_dst:?}"/*
+                (cd "$_src" && tar cf - . 2>/dev/null) | (cd "$_dst" && tar xf - 2>/dev/null)
+                if [ $? -ne 0 ]; then
+                    log_err "写入 $_subdir 失败"
+                    return 1
+                fi
+            fi
+        done
+        unset IFS
+
+        fix_permissions "$_game_data"
+        return 0
+    fi
 }
 
 # 修复文件权限和 SELinux 上下文
@@ -198,19 +202,29 @@ rollback() {
 
     log_warn "正在回滚..."
 
-    _subdirs="$(get_pkg_subdirs "$_game_name")"
-    IFS=','
-    for _subdir in $_subdirs; do
-        _subdir="$(echo "$_subdir" | tr -d ' ')"
-        _src="$_snapshot_dir/$_subdir"
-        _dst="$_game_data/$_subdir"
+    # 读取快照方法
+    _snap_meta="$_snapshot_dir/snapshot.json"
+    _method="$(grep '"backup_method"' "$_snap_meta" 2>/dev/null | head -1 | sed 's/.*"backup_method": *"//' | sed 's/".*//')"
 
-        if [ -d "$_src" ]; then
-            rm -rf "${_dst:?}"/*
-            cp -r "$_src"/* "$_dst/" 2>/dev/null
-        fi
-    done
-    unset IFS
+    if [ "$_method" = "full" ]; then
+        find "$_game_data" -mindepth 1 -maxdepth 1 ! -name lib -exec rm -rf {} + 2>/dev/null
+        (cd "$_snapshot_dir" && tar cf - . 2>/dev/null) | (cd "$_game_data" && tar xf - 2>/dev/null) || { log_err "回滚写入失败"; return 1; }
+    else
+        # 旧格式兼容
+        _subdirs="$(grep '"subdirs"' "$_snap_meta" 2>/dev/null | head -1 | sed 's/.*"subdirs": *"//' | sed 's/".*//')"
+        [ -z "$_subdirs" ] && _subdirs="$(get_pkg_subdirs "$_game_name")"
+        IFS=','
+        for _subdir in $_subdirs; do
+            _subdir="$(echo "$_subdir" | tr -d ' ')"
+            _src="$_snapshot_dir/$_subdir"
+            _dst="$_game_data/$_subdir"
+            if [ -d "$_src" ]; then
+                rm -rf "${_dst:?}"/*
+                (cd "$_src" && tar cf - . 2>/dev/null) | (cd "$_dst" && tar xf - 2>/dev/null)
+            fi
+        done
+        unset IFS
+    fi
 
     _pkg="$(get_pkg_name "$_game_name")"
     fix_permissions "$_game_data"
