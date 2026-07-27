@@ -1,215 +1,117 @@
 #!/system/bin/sh
 #===============================================================================
-# qiuhe Web UI - CGI API 处理
+# 清湫 - CGI API 端点
 #===============================================================================
 
 WEB_DIR="$(cd "$(dirname "$0")" && pwd)"
 QIUHE_HOME="$(dirname "$WEB_DIR")"
-
-# QH_DATA_DIR 若已由环境设置则沿用，否则交 common.sh 自动检测
-# （Magisk 模块环境由开机脚本导出，独立运行由终端用户设置）
 export QH_DATA_DIR="${QH_DATA_DIR:-}"
 
+# 加载库 (优先模块 lib 目录，回退到 webroot)
 . "$QIUHE_HOME/lib/common.sh" 2>/dev/null || . "$WEB_DIR/common.sh" 2>/dev/null
-. "$QIUHE_HOME/lib/games.sh" 2>/dev/null || . "$WEB_DIR/games.sh" 2>/dev/null
-. "$QIUHE_HOME/lib/crypto.sh" 2>/dev/null
+. "$QIUHE_HOME/lib/games.sh"  2>/dev/null || . "$WEB_DIR/games.sh"  2>/dev/null
+. "$QIUHE_HOME/lib/crypto.sh"  2>/dev/null
 . "$QIUHE_HOME/lib/account.sh" 2>/dev/null
-. "$QIUHE_HOME/lib/detect.sh" 2>/dev/null
-. "$QIUHE_HOME/lib/switch.sh" 2>/dev/null
-. "$QIUHE_HOME/lib/ai.sh" 2>/dev/null
+. "$QIUHE_HOME/lib/detect.sh"  2>/dev/null
+. "$QIUHE_HOME/lib/switch.sh"  2>/dev/null
+. "$QIUHE_HOME/lib/ai.sh"      2>/dev/null
 
 ensure_data_dirs
 
-content_type_json() {
-    echo "Content-Type: application/json"
-    echo ""
-}
+json() { echo "Content-Type: application/json"; echo ""; echo "$1"; }
+json_err() { json "{\"error\":\"$1\"}"; }
 
-output_json() {
-    content_type_json
-    echo "$1"
-}
-
-output_error() {
-    output_json "{\"error\":\"$1\"}"
-}
-
-# 从查询字符串或 POST body 中取参数
+# URL 参数解析
 get_param() {
-    _key="$1"
-    _default="$2"
-
+    _key="$1"; _default="$2"
     if [ "$REQUEST_METHOD" = "POST" ] && [ -n "$CONTENT_LENGTH" ] && [ "$CONTENT_LENGTH" -gt 0 ]; then
         _body="$(dd bs=1 count="$CONTENT_LENGTH" 2>/dev/null)"
-        _val="$(echo "$_body" | grep -o "${_key}=[^&]*" | head -1 | sed "s/${_key}=//" | sed 's/+/ /g' | sed 's/%/\\x/g' | xargs -0 printf '%b' 2>/dev/null)"
+        _val="$(echo "$_body" | grep -o "${_key}=[^&]*" | head -1 | sed "s/${_key}=//" | sed 's/+/ /g')"
     else
-        _val="$(echo "$QUERY_STRING" | grep -o "${_key}=[^&]*" | head -1 | sed "s/${_key}=//" | sed 's/+/ /g' | sed 's/%/\\x/g' | xargs -0 printf '%b' 2>/dev/null)"
+        _val="$(echo "$QUERY_STRING" | grep -o "${_key}=[^&]*" | head -1 | sed "s/${_key}=//" | sed 's/+/ /g')"
     fi
-
-    if [ -n "$_val" ]; then
-        echo "$_val"
-    else
-        echo "$_default"
-    fi
+    [ -n "$_val" ] && echo "$_val" || echo "$_default"
 }
+
+_url_decode() { echo "$1" | sed 's/%20/ /g;s/%0A/\n/g;s/+/ /g'; }
 
 check_root
 detect_env
 
-# 解析路径 (兼容 /api/xxx 和 /cgi-bin/api/xxx)
-_path="$PATH_INFO"
-_action="${_path#/api/}"
-[ "$_action" = "$_path" ] && _action="${_path#/}"
+# 路由: 从 PATH_INFO 提取 action
+_action="${PATH_INFO#/}"
 _action="${_action%%\?*}"
 
 case "$_action" in
     detect)
         _entries="$(detect_all_entries)"
-        if [ -z "$_entries" ]; then
-            output_json "{\"games\":[]}"
-        else
-            output_json "{\"games\":[$_entries]}"
-        fi
-        exit 0
+        if [ -z "$_entries" ]; then json "{\"games\":[]}"
+        else json "{\"games\":[$_entries]}"; fi
         ;;
-
     accounts)
         _game="$(get_param game "")"
-        _found=""
-
-        if [ -n "$_game" ]; then
-            _dir="$ACCOUNTS_DIR/$_game"
-        else
-            _dir="$ACCOUNTS_DIR"
-        fi
-
+        _found=""; _dir="${ACCOUNTS_DIR}${_game:+/$_game}"
         if [ -d "$_dir" ]; then
-            for _meta in $(find "$_dir" -name meta.json 2>/dev/null); do
-                [ -f "$_meta" ] || continue
-                _alias="$(grep '"alias"' "$_meta" | head -1 | sed 's/.*"alias": *"//' | sed 's/".*//')"
-                _g="$(grep '"game"' "$_meta" | head -1 | sed 's/.*"game": *"//' | sed 's/".*//')"
-                _time="$(grep '"created_at"' "$_meta" | head -1 | sed 's/.*"created_at": *"//' | sed 's/".*//')"
-                _size="$(grep '"data_size"' "$_meta" | head -1 | sed 's/.*"data_size": *"//' | sed 's/".*//')"
-                _display="$(get_display_name "$_g")"
-
-                if [ -n "$_found" ]; then _found="$_found,"; fi
-                _found="${_found}{\"alias\":\"$_alias\",\"game\":\"$_g\",\"display\":\"$_display\",\"time\":\"$_time\",\"size\":\"$_size\"}"
+            for _m in $(find "$_dir" -name meta.json 2>/dev/null); do
+                [ -f "$_m" ] || continue
+                _al="$(grep '"alias"' "$_m" | head -1 | sed 's/.*"alias": *"//;s/".*//')"
+                _gn="$(grep '"game"' "$_m" | head -1 | sed 's/.*"game": *"//;s/".*//')"
+                _tm="$(grep '"created_at"' "$_m" | head -1 | sed 's/.*"created_at": *"//;s/".*//')"
+                _sz="$(grep '"data_size"' "$_m" | head -1 | sed 's/.*"data_size": *"//;s/".*//')"
+                _dp="$(get_display_name "$_gn")"
+                [ -n "$_found" ] && _found="$_found,"
+                _found="${_found}{\"alias\":\"$_al\",\"game\":\"$_gn\",\"display\":\"$_dp\",\"time\":\"$_tm\",\"size\":\"$_sz\"}"
             done
         fi
-
-        output_json "{\"accounts\":[$_found]}"
-        exit 0
+        json "{\"accounts\":[${_found}]}"
         ;;
-
     backup)
-        _game="$(get_param game "")"
-        _alias="$(get_param alias "")"
-        _path="$(get_param path "")"
-
-        if [ -z "$_game" ] || [ -z "$_alias" ]; then
-            output_error "请提供游戏和账号别名"
-            exit 1
-        fi
-
+        _game="$(get_param game "")"; _alias="$(get_param alias "")"; _path="$(get_param path "")"
+        [ -z "$_game" ] || [ -z "$_alias" ] && { json_err "需要 game 和 alias"; exit 1; }
         if account_backup "$_game" "$_alias" "$_path" >/dev/null 2>&1; then
-            output_json "{\"ok\":true,\"alias\":\"$_alias\"}"
-        else
-            output_error "备份失败"
-        fi
-        exit 0
+            json "{\"ok\":true,\"alias\":\"$_alias\"}"
+        else json_err "备份失败"; fi
         ;;
-
     restore)
         _alias="$(get_param alias "")"
-
-        if [ -z "$_alias" ]; then
-            output_error "请提供账号别名"
-            exit 1
-        fi
-
+        [ -z "$_alias" ] && { json_err "需要 alias"; exit 1; }
         if switch_account "$_alias" >/dev/null 2>&1; then
-            output_json "{\"ok\":true,\"alias\":\"$_alias\"}"
-        else
-            output_error "恢复失败"
-        fi
-        exit 0
+            json "{\"ok\":true,\"alias\":\"$_alias\"}"
+        else json_err "切换失败"; fi
         ;;
-
     delete)
         _alias="$(get_param alias "")"
-
-        if [ -z "$_alias" ]; then
-            output_error "请提供账号别名"
-            exit 1
-        fi
-
-        if account_delete "$_alias" </dev/null >/dev/null 2>&1; then
-            output_json "{\"ok\":true,\"alias\":\"$_alias\"}"
-        else
-            output_error "删除失败"
-        fi
-        exit 0
+        [ -z "$_alias" ] && { json_err "需要 alias"; exit 1; }
+        if account_delete "$_alias" >/dev/null 2>&1; then
+            json "{\"ok\":true,\"alias\":\"$_alias\"}"
+        else json_err "删除失败"; fi
         ;;
-
+    status)
+        json "{\"ok\":true,\"version\":\"v2.0.0\",\"dataDir\":\"$DATA_DIR\"}"
+        ;;
     ai/chat)
-        _msg="$(get_param msg "")"
-        if [ -z "$_msg" ]; then
-            output_error "请输入消息内容"
-            exit 1
-        fi
-        _resp="$(ai_chat "$_msg")"
-        output_json "$_resp"
-        exit 0
+        _msg="$(_url_decode "$(get_param msg "")")"
+        [ -z "$_msg" ] && { json_err "需要 msg"; exit 1; }
+        _resp="$(ai_chat "$_msg" 2>/dev/null)"
+        [ -z "$_resp" ] && { json_err "AI 请求失败，请确认 API Key 已配置"; exit 1; }
+        json "$_resp"
         ;;
-
     ai/config)
-        _action="$(get_param action "")"
-        load_ai_config
-        case "$_action" in
-            get)
-                ai_status
-                exit 0
-                ;;
-            set)
-                _key="$(get_param key "")"
-                if [ -z "$_key" ]; then
-                    output_error "请提供 API Key"
-                    exit 1
-                fi
-                save_ai_config "$_key"
-                output_json "{\"ok\":true,\"message\":\"API Key 已保存\"}"
-                exit 0
-                ;;
-            delete)
-                cat /dev/null > "$AI_CONFIG" 2>/dev/null
-                output_json "{\"ok\":true,\"message\":\"配置已清除\"}"
-                exit 0
-                ;;
-            *)
-                output_error "ai/config 用法: action=get|set|delete"
-                exit 1
-                ;;
+        _act="$(get_param action "")"
+        case "$_act" in
+            get)  json "{\"configured\":$(ai_is_configured)}" ;;
+            set)  _key="$(get_param key "")"; ai_set_key "$_key"; json "{\"ok\":true}" ;;
+            delete) ai_clear_config; json "{\"ok\":true}" ;;
+            *) json_err "action: get|set|delete" ;;
         esac
         ;;
-
     ai/command)
-        _msg="$(get_param msg "")"
-        if [ -z "$_msg" ]; then
-            output_error "请输入指令内容"
-            exit 1
-        fi
-        _resp="$(ai_parse_command "$_msg")"
-        output_json "$_resp"
-        exit 0
+        _msg="$(_url_decode "$(get_param msg "")")"
+        _cmd="$(ai_parse_command "$_msg" 2>/dev/null)"
+        [ -n "$_cmd" ] && json "$_cmd" || json "{\"cmd\":\"chat\"}"
         ;;
-
-    status)
-        output_json "{\"ok\":true,\"version\":\"v1.0.0\",\"dataDir\":\"$DATA_DIR\"}"
-        exit 0
-        ;;
-
     *)
-        output_json "{\"error\":\"未知接口\",\"usage\":\"detect|accounts|backup|restore|delete|status|ai/chat|ai/config|ai/command\"}"
-        exit 1
+        json_err "未知接口: $_action"
         ;;
 esac
+exit 0
