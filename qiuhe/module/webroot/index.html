@@ -140,18 +140,20 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:linear-gr
 <div id="t" class="tst"></div>
 
 <script>
-var API='http://127.0.0.1:8848/cgi-bin/api';
+var API='/data/adb/modules/qinghe/webroot/cgi-bin/api';
 var cg=null,cgd='',cgpt='',cgcl=false,aiOk=false;
 
 function toast(m,c){var t=document.getElementById('t');t.className='tst '+(c||'in')+' on';t.textContent=m;setTimeout(function(){t.classList.remove('on')},2000)}
 function cfShow(tt,mm,cb){document.getElementById('cft').textContent=tt;document.getElementById('cfm').textContent=mm;document.getElementById('cfo').classList.add('on');document.getElementById('cfk').onclick=function(){cfClose(true)};window._cfcb=cb}
 function cfClose(ok){document.getElementById('cfo').classList.remove('on');if(ok&&window._cfcb)window._cfcb();window._cfcb=null}
 
-function api(path,pr,cb){
-  var u=API+'?action='+path;
-  var o={method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'}};
-  if(pr) o.body=Object.entries(pr).map(function(kv){return kv[0]+'='+encodeURIComponent(kv[1])}).join('');
-  fetch(u,o).then(function(r){return r.json()}).then(cb).catch(function(){toast('无法连接服务,请检查模块状态','er');document.getElementById('gl').innerHTML='<div class="emp"><div class="em">😿</div><div class="tx">服务未启动</div></div>'})
+function api(action,pr,cb){
+  var cmd=API+' '+action;
+  if(pr&&pr!==0) for(var k in pr){cmd+=" "+k+"='"+String(pr[k]).replace(/'/g,"'\\''")+"'"}
+  ksu.exec(cmd).then(function(r){
+    if(r.errno!==0){cb({error:'执行失败'});return}
+    try{cb(JSON.parse(r.stdout))}catch(e){cb({error:'解析失败: '+r.stdout.slice(0,50)})}
+  }).catch(function(e){toast('无法执行命令','er');cb({error:'ksu.exec 不可用'})})
 }
 
 function gicon(n){
