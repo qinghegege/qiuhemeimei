@@ -1,6 +1,6 @@
 #!/system/bin/sh
 #===============================================================================
-# 清湫 v2.1.1 - KSU 安装脚本
+# 清湫 v2.1.2 - KSU 安装脚本
 # 无外部依赖: 使用 KSU WebUI ksu.exec 桥接, 零 HTTP 服务
 #===============================================================================
 
@@ -66,7 +66,7 @@ main() {
         delete|remove) account_delete "$2" ;;
         switch) switch_account "$2" ;;
         help|-h|--help) echo "清湫: detect | backup <游戏> <别名> | list | switch <别名> | delete <别名> | help" ;;
-        *) echo "清湫 v2.1.1  用法: qh help" ;;
+        *) echo "清湫 v2.1.2  用法: qh help" ;;
     esac
 }
 main "$@"

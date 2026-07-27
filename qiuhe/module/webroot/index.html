@@ -102,14 +102,37 @@ function gicon(n){
   return m[n]||{e:'🎮',b:'#F5F5F5'}
 }
 
+var ALL_GAMES=[
+  {name:'sgame',display:'王者荣耀',pkg:'com.tencent.tmgp.sgame',path:'/data/data/com.tencent.tmgp.sgame'},
+  {name:'pubgm',display:'和平精英',pkg:'com.tencent.tmgp.pubgmhd',path:'/data/data/com.tencent.tmgp.pubgmhd'},
+  {name:'cf',display:'CF手游',pkg:'com.tencent.tmgp.cf',path:'/data/data/com.tencent.tmgp.cf'},
+  {name:'dfm',display:'三角洲行动',pkg:'com.tencent.tmgp.dfm',path:'/data/data/com.tencent.tmgp.dfm'},
+  {name:'valorant',display:'无畏契约',pkg:'com.tencent.tmgp.valorant',path:'/data/data/com.tencent.tmgp.valorant'}
+];
+
+var _detectDone=false;
+
 function loadGames(){
-  api('detect',0,function(d){
-    var gs=d.games||[],i=gs.filter(function(g){return g.installed}),n=gs.filter(function(g){return !g.installed}),h='';
-    if(!i.length)h+='<div class="emp"><div class="em">🎮</div><div class="tx">未检测到已安装的腾讯手游</div></div>';
-    i.forEach(function(g){var ic=gicon(g.name);var lb=g.clone?' · 分身':'';var pt=g.path||'';var cj=''+!!g.clone;h+='<div class="gc" onclick="openGame(\''+g.name+'\',\''+g.display+lb+'\',\''+(g.size||'0')+'\',\''+pt+'\','+cj+')"><div class="gt"><div class="gi" style="background:'+ic.b+'">'+ic.e+'</div><div style="flex:1"><div class="gn">'+g.display+lb+'</div><div class="gm">'+g.pkg+' · 数据: '+(g.size||'0')+'</div></div><span class="bdg bok">'+(g.clone?'分身':'已安装')+'</span><span class="arr">›</span></div></div>'});
-    if(n.length){h+='<div style="font-size:11px;color:#C0B8C8;margin:14px 0 6px;font-weight:600">未安装</div>';n.forEach(function(g){h+='<div class="gc" style="opacity:0.5;cursor:default"><div class="gt"><div class="gi" style="background:#F0F0F0">❓</div><div style="flex:1"><div class="gn">'+g.display+'</div><div class="gm">'+g.pkg+'</div></div><span class="bdg bno">未安装</span></div></div>'})}
-    document.getElementById('gl').innerHTML=h;
-  })
+  _detectDone=false;var el=document.getElementById('gl');
+  el.innerHTML='<div class="ld"><div class="sp"></div><div class="lt">正在检测游戏...</div></div>';
+  var t=setTimeout(function(){if(!_detectDone){_detectDone=true;showManual(el)}},5000);
+  api('detect',0,function(d){if(_detectDone)return;_detectDone=true;clearTimeout(t);renderGames(d,el)})
+}
+
+function showManual(el){
+  var h='<div class="emp"><div class="em">⏱️</div><div class="tx" style="font-size:12px;color:#FF6B9D;font-weight:600">检测超时</div><div class="tx">手动选择游戏并输入数据路径</div></div>';
+  ALL_GAMES.forEach(function(g){var ic=gicon(g.name);h+='<div class="gc" onclick="manualGame(\''+g.name+'\',\''+g.display+'\')"><div class="gt"><div class="gi" style="background:'+ic.b+'">'+ic.e+'</div><div style="flex:1"><div class="gn">'+g.display+'</div><div class="gm">'+g.pkg+'</div></div><span class="arr">›</span></div></div>'});
+  el.innerHTML=h
+}
+
+function manualGame(nm,dp){var pt=prompt(dp+' 数据路径:');if(!pt||!pt.trim())return;pt=pt.trim();openGame(nm,dp,'—',pt,false)}
+
+function renderGames(d,el){
+  var gs=d.games||[],i=gs.filter(function(g){return g.installed}),n=gs.filter(function(g){return !g.installed}),h='';
+  if(!i.length){h+='<div class="emp"><div class="em">🎮</div><div class="tx">未检测到已安装游戏</div></div>';
+    ALL_GAMES.forEach(function(g){var ic=gicon(g.name);h+='<div class="gc" onclick="manualGame(\''+g.name+'\',\''+g.display+'\')" style="opacity:0.85"><div class="gt"><div class="gi" style="background:#F0F0F0">📂</div><div style="flex:1"><div class="gn">'+g.display+'</div><div class="gm">手动指定路径备份</div></div><span class="arr">›</span></div></div>'})}
+  else i.forEach(function(g){var ic=gicon(g.name);var lb=g.clone?' · 分身':'';var pt=g.path||'';var cj=''+!!g.clone;h+='<div class="gc" onclick="openGame(\''+g.name+'\',\''+g.display+lb+'\',\''+(g.size||'—')+'\',\''+pt+'\','+cj+')"><div class="gt"><div class="gi" style="background:'+ic.b+'">'+ic.e+'</div><div style="flex:1"><div class="gn">'+g.display+lb+'</div><div class="gm">'+g.pkg+' · 数据: '+(g.size||'—')+'</div></div><span class="bdg bok">'+(g.clone?'分身':'已安装')+'</span><span class="arr">›</span></div></div>'});
+  el.innerHTML=h
 }
 
 function openGame(nm,dp,sz,pt,cl){
