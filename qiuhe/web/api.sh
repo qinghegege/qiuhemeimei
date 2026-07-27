@@ -114,7 +114,7 @@ case "$_action" in
         account_delete "$_a" >/dev/null 2>&1 && respond "{\"ok\":true,\"alias\":\"$_a\"}" || respond_err "删除失败"
         ;;
     status)
-        respond "{\"ok\":true,\"version\":\"v2.0.0\",\"dataDir\":\"$DATA_DIR\"}"
+        respond "{\"ok\":true,\"version\":\"v2.0.1\",\"dataDir\":\"$DATA_DIR\"}"
         ;;
     ai/chat)
         _msg="$(getp msg "")"
