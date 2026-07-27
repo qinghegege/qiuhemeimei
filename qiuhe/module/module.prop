@@ -1,6 +1,6 @@
 id=qinghe
 name=清湫
-version=v2.0.1
-versionCode=6
+version=v2.1.0
+versionCode=7
 author=qinghegege
-description=腾讯手游账号本地切换器,支持王者荣耀/和平精英/CF手游等。备份/切换账号数据,分身版检测,DeepSeek AI助手。零外部依赖,开箱即用。
+description=腾讯手游账号本地切换器,支持王者荣耀/和平精英/CF手游等。备份/切换账号数据,分身版检测。零外部依赖,开箱即用。

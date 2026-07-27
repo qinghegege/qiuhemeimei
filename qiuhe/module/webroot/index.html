@@ -60,41 +60,6 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:linear-gr
 .tst.ok{background:#98D8C8;color:#fff}
 .tst.er{background:#FF8A80;color:#fff}
 .tst.in{background:rgba(0,0,0,0.75);color:#fff}
-
-.mo{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:7;display:none;align-items:flex-end;justify-content:center}
-.mo.on{display:flex}
-.md{background:#fff;width:100%;max-width:460px;border-radius:18px 18px 0 0;padding:20px 16px 24px;max-height:65vh;overflow-y:auto}
-.md h3{font-size:16px;color:#5D4E5F;margin-bottom:4px;font-weight:700}
-.md p{font-size:12px;color:#B8A9C6;margin-bottom:12px}
-.md input{width:100%;padding:10px 12px;border:2px solid #FFE4EC;border-radius:10px;font-size:14px;color:#5D4E5F;outline:none;background:#FFF8FA;margin-bottom:10px}
-.md input:focus{border-color:#FF6B9D}
-.cf{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:10;display:none;align-items:center;justify-content:center}
-.cf.on{display:flex}
-.cb{background:#fff;border-radius:14px;padding:22px 18px;text-align:center;width:270px}
-.cb h3{font-size:15px;color:#5D4E5F;margin-bottom:6px}
-.cb p{font-size:12px;color:#B8A9C6;margin-bottom:16px;line-height:1.4}
-.cr{display:flex;gap:7px}
-
-.fab{position:fixed;bottom:18px;right:14px;width:46px;height:46px;border-radius:23px;background:linear-gradient(135deg,#FF6B9D,#FF85AB);color:#fff;font-size:22px;border:none;box-shadow:0 3px 12px rgba(255,107,157,0.3);cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;transition:transform .2s}
-.fab:active{transform:scale(0.9)}
-
-.aip{position:fixed;top:0;left:0;right:0;bottom:0;background:#FFF5F7;z-index:6;display:none;flex-direction:column}
-.aip.on{display:flex}
-.aih{background:linear-gradient(135deg,#FF6B9D,#FF85AB);padding:12px 14px;display:flex;align-items:center;gap:8px;color:#fff}
-.aih .ab{font-size:18px;cursor:pointer;padding:2px}
-.aih .at{font-size:15px;font-weight:600;flex:1}
-.ach{flex:1;overflow-y:auto;padding:10px 12px}
-.abb{max-width:85%;padding:9px 12px;border-radius:12px;font-size:12px;line-height:1.4;margin-bottom:8px;word-break:break-word}
-.abb.u{margin-left:auto;background:#FF6B9D;color:#fff;border-bottom-right-radius:3px}
-.abb.b{background:#fff;color:#5D4E5F;border-bottom-left-radius:3px;box-shadow:0 1px 3px rgba(255,107,157,0.04)}
-.abb.e{background:#FFE0E0;color:#C0392B}
-.ain{display:flex;gap:6px;padding:8px 12px;border-top:1px solid #FFE4EC;background:#fff}
-.ain input{flex:1;padding:9px 12px;border:2px solid #FFE4EC;border-radius:18px;font-size:13px;outline:none;background:#FFF8FA;color:#5D4E5F}
-.ain input:focus{border-color:#FF6B9D}
-.aic{margin:6px 12px;padding:8px 10px;background:#fff;border-radius:10px;display:none;border:1px solid #FFE4EC}
-.aic.on{display:block}
-.aic input{width:100%;padding:7px 8px;border:1px solid #FFE4EC;border-radius:7px;font-size:12px;margin:4px 0;outline:none;background:#FFF8FA}
-.aic input:focus{border-color:#FF6B9D}
 </style>
 </head>
 <body>
@@ -111,37 +76,13 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:linear-gr
   </div>
 </div>
 
-<button class="fab" onclick="aiOpen()">✨</button>
-
-<div class="aip" id="aip">
-  <div class="aih">
-    <span class="ab" onclick="aiClose()">←</span><span class="at">AI 助手</span>
-    <button class="btn bsm bw" style="margin:0;padding:4px 8px;font-size:10px" onclick="document.getElementById('aicf').classList.toggle('on')">⚙</button>
-  </div>
-  <div class="aic" id="aicf">
-    <div style="font-size:11px;color:#B8A9C6;margin-bottom:2px">DeepSeek API Key</div>
-    <input type="password" id="aik" placeholder="sk-xxxxxxxx">
-    <div style="display:flex;gap:5px;margin-top:3px">
-      <button class="btn bp bsm" style="margin:0" onclick="aiSave()">保存</button>
-      <button class="btn bc bsm" style="margin:0" onclick="aiDelCfg()">清除</button>
-    </div>
-  </div>
-  <div class="ach" id="ach">
-    <div class="abb b">你好呀~ 我是清荷 AI 助手 💕<br><br>配置 DeepSeek API Key 后，就可以用自然语言管理账号啦。</div>
-  </div>
-  <div class="ain">
-    <input type="text" id="ait" placeholder="比如: 切换到王者荣耀大号" onkeydown="if(event.key==='Enter')aiSend()">
-    <button class="btn bp" style="width:auto;margin:0;padding:9px 16px;border-radius:18px;font-size:13px" onclick="aiSend()">发送</button>
-  </div>
-</div>
-
 <div class="mo" id="mo"><div class="md" id="md"></div></div>
 <div class="cf" id="cfo"><div class="cb"><h3 id="cft"></h3><p id="cfm"></p><div class="cr"><button class="btn bw" style="flex:1;margin:0" onclick="cfClose(false)">取消</button><button class="btn bp" style="flex:1;margin:0" id="cfk">确认</button></div></div></div>
 <div id="t" class="tst"></div>
 
 <script>
 var API='/data/adb/modules/qinghe/webroot/cgi-bin/api';
-var cg=null,cgd='',cgpt='',cgcl=false,aiOk=false;
+var cg=null,cgd='',cgpt='',cgcl=false;
 
 function toast(m,c){var t=document.getElementById('t');t.className='tst '+(c||'in')+' on';t.textContent=m;setTimeout(function(){t.classList.remove('on')},2000)}
 function cfShow(tt,mm,cb){document.getElementById('cft').textContent=tt;document.getElementById('cfm').textContent=mm;document.getElementById('cfo').classList.add('on');document.getElementById('cfk').onclick=function(){cfClose(true)};window._cfcb=cb}
@@ -210,17 +151,6 @@ function doDel(al){
     api('delete',{alias:al},function(d){if(d.ok){toast('已删除: '+al,'ok');loadDetail()}else{toast(d.error||'失败','er');loadDetail()}})
   })
 }
-
-// AI
-function aiOpen(){document.getElementById('aip').classList.add('on');document.querySelector('.fab').style.display='none';api('ai/config',{op:'get'},function(d){if(d.configured){aiOk=true;document.getElementById('aicf').classList.remove('on')}else{aiOk=false;document.getElementById('aicf').classList.add('on')}})}
-function aiClose(){document.getElementById('aip').classList.remove('on');document.querySelector('.fab').style.display='flex'}
-function aiSave(){var k=document.getElementById('aik').value.trim();if(!k){toast('请输入 Key','er');return}api('ai/config',{op:'set',key:k},function(d){if(d.ok){aiOk=true;document.getElementById('aicf').classList.remove('on');toast('已保存','ok');aiAdd('b','配置成功~ 现在可以用自然语言管理账号啦 💕')}else toast(d.error||'失败','er')})}
-function aiDelCfg(){cfShow('清除配置','确认清除 API Key？',function(){api('ai/config',{op:'delete'},function(d){aiOk=false;document.getElementById('aik').value='';toast('已清除','ok')})})}
-function aiAdd(r,c,e){var ch=document.getElementById('ach');var d=document.createElement('div');d.className='abb '+(r==='u'?'u':(e?'e':'b'));d.innerHTML=c.replace(/\n/g,'<br>');ch.appendChild(d);ch.scrollTop=ch.scrollHeight}
-function aiSend(){var i=document.getElementById('ait');var m=i.value.trim();if(!m)return;i.value='';aiAdd('u',m);if(!aiOk){aiAdd('b','请先点击 ⚙ 配置 API Key',true);return}aiTyping();api('ai/chat',{msg:m},function(d){aiHideTyping();if(d.error){aiAdd('b','错误: '+d.error,true);return}if(d.choices&&d.choices[0]&&d.choices[0].message){var r=d.choices[0].message.content;aiAdd('b',r);aiPCmd(r)}else aiAdd('b','返回异常',true)})}
-function aiTyping(){var ch=document.getElementById('ach');var d=document.createElement('div');d.id='ty';d.innerHTML='<div class="abb b" style="color:#C0B8C8;font-size:11px">思考中...</div>';ch.appendChild(d);ch.scrollTop=ch.scrollHeight}
-function aiHideTyping(){var e=document.getElementById('ty');if(e)e.remove()}
-function aiPCmd(t){var m=t.match(/\{[^}]*"cmd"[^}]*\}/);if(!m)return;try{var c=JSON.parse(m[0]);if(!c.cmd||c.cmd==='chat')return;if(c.cmd==='switch'||c.cmd==='restore'){if(!c.alias)return;aiAdd('b','正在切换...');api('restore',{alias:c.alias},function(d){if(d.ok)aiAdd('b','已切换到: '+c.alias);else aiAdd('b','切换失败','e')})}else if(c.cmd==='backup'){if(!c.game||!c.alias)return;aiAdd('b','正在备份...');api('backup',{game:c.game,alias:c.alias},function(d){if(d.ok)aiAdd('b','备份成功: '+c.alias);else aiAdd('b','备份失败','e')})}else if(c.cmd==='list'){api('accounts',{},function(d){if(d.accounts&&d.accounts.length){var l=d.accounts.map(function(a){return a.alias+' ('+a.display+')'}).join('<br>');aiAdd('b','已备份:<br>'+l)}else aiAdd('b','暂无备份')})}else if(c.cmd==='detect'){api('detect',{},function(d){if(d.games){var i=d.games.filter(function(g){return g.installed}).map(function(g){return g.display}).join(', ');aiAdd('b','已安装: '+(i||'无'))}})}else if(c.cmd==='delete')aiAdd('b','删除操作请在游戏详情页手动确认')}catch(e){}}
 
 loadGames();
 </script>

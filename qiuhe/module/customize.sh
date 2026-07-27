@@ -1,6 +1,6 @@
 #!/system/bin/sh
 #===============================================================================
-# 清湫 v2.0.1 - KSU 安装脚本
+# 清湫 v2.1.0 - KSU 安装脚本
 # 无外部依赖: 使用 KSU WebUI ksu.exec 桥接, 零 HTTP 服务
 #===============================================================================
 
@@ -21,7 +21,7 @@ mkdir -p "$DATA_DIR/accounts" "$DATA_DIR/snapshots" "$DATA_DIR/logs"
 
 # 脚本
 ui_print "- 复制脚本库..."
-for _f in common.sh games.sh games.ini crypto.sh account.sh detect.sh switch.sh ai.sh; do
+for _f in common.sh games.sh games.ini crypto.sh account.sh detect.sh switch.sh; do
     cp -f "$MODDIR/lib/$_f" "$SCRIPT_DIR/lib/" 2>/dev/null
 done
 cp -f "$MODDIR/web/server.sh" "$SCRIPT_DIR/web/" 2>/dev/null
@@ -38,7 +38,6 @@ cp -f "$MODDIR/lib/crypto.sh"  "$MODDIR/webroot/" 2>/dev/null
 cp -f "$MODDIR/lib/account.sh" "$MODDIR/webroot/" 2>/dev/null
 cp -f "$MODDIR/lib/detect.sh"  "$MODDIR/webroot/" 2>/dev/null
 cp -f "$MODDIR/lib/switch.sh"  "$MODDIR/webroot/" 2>/dev/null
-cp -f "$MODDIR/lib/ai.sh"      "$MODDIR/webroot/" 2>/dev/null
 mkdir -p "$MODDIR/webroot/cgi-bin" 2>/dev/null
 cp -f "$MODDIR/web/api.sh" "$MODDIR/webroot/cgi-bin/api" 2>/dev/null
 chmod 755 "$MODDIR/webroot/cgi-bin/api" 2>/dev/null
@@ -67,7 +66,7 @@ main() {
         delete|remove) account_delete "$2" ;;
         switch) switch_account "$2" ;;
         help|-h|--help) echo "清湫: detect | backup <游戏> <别名> | list | switch <别名> | delete <别名> | help" ;;
-        *) echo "清湫 v2.0.1  用法: qh help" ;;
+        *) echo "清湫 v2.1.0  用法: qh help" ;;
     esac
 }
 main "$@"

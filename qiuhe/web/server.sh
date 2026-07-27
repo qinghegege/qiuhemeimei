@@ -23,7 +23,6 @@ start_web() {
     cp -f "$QIUHE_HOME/lib/common.sh"  "$WEB_DIR/" 2>/dev/null
     cp -f "$QIUHE_HOME/lib/games.sh"   "$WEB_DIR/" 2>/dev/null
     cp -f "$QIUHE_HOME/lib/games.ini"  "$WEB_DIR/" 2>/dev/null
-    cp -f "$QIUHE_HOME/lib/ai.sh"      "$WEB_DIR/" 2>/dev/null
 
     # CGI 入口
     mkdir -p "$WEB_DIR/cgi-bin" 2>/dev/null

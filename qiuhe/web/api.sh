@@ -18,7 +18,6 @@ export QIUHE_HOME="$MODDIR"
 . "$MODDIR/lib/account.sh" 2>/dev/null
 . "$MODDIR/lib/detect.sh"  2>/dev/null
 . "$MODDIR/lib/switch.sh"  2>/dev/null
-. "$MODDIR/lib/ai.sh"      2>/dev/null
 
 ensure_data_dirs
 
@@ -114,28 +113,7 @@ case "$_action" in
         account_delete "$_a" >/dev/null 2>&1 && respond "{\"ok\":true,\"alias\":\"$_a\"}" || respond_err "删除失败"
         ;;
     status)
-        respond "{\"ok\":true,\"version\":\"v2.0.1\",\"dataDir\":\"$DATA_DIR\"}"
-        ;;
-    ai/chat)
-        _msg="$(getp msg "")"
-        [ -z "$_msg" ] && { respond_err "需要 msg"; exit 1; }
-        _resp="$(ai_chat "$_msg")"
-        [ -z "$_resp" ] && { respond_err "AI 请求失败或 Key 未配置"; exit 1; }
-        respond "$_resp"
-        ;;
-    ai/config)
-        _op="$(getp op "")"
-        case "$_op" in
-            get)  respond "{\"configured\":$(ai_is_configured)}" ;;
-            set)  ai_set_key "$(getp key "")"; respond_ok ;;
-            delete) ai_clear_config; respond_ok ;;
-            *) respond_err "op: get|set|delete" ;;
-        esac
-        ;;
-    ai/command)
-        _msg="$(getp msg "")"
-        _cmd="$(ai_parse_command "$_msg" 2>/dev/null)"
-        [ -n "$_cmd" ] && respond "$_cmd" || respond "{\"cmd\":\"chat\"}"
+        respond "{\"ok\":true,\"version\":\"v2.1.0\",\"dataDir\":\"$DATA_DIR\"}"
         ;;
     *)  respond_err "未知接口: $_action" ;;
 esac
