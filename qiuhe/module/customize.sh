@@ -128,4 +128,26 @@ ui_print "安装完成!"
 ui_print "终端输入 'qh' 即可使用"
 ui_print "数据存储在: $DATA_DIR"
 ui_print ""
+
+# 复制 lib 到 webroot 供 CGI 使用
+cp -f "$MODDIR/lib/common.sh"   "$MODDIR/webroot/" 2>/dev/null || true
+cp -f "$MODDIR/lib/games.sh"    "$MODDIR/webroot/" 2>/dev/null || true
+cp -f "$MODDIR/lib/games.ini"   "$MODDIR/webroot/" 2>/dev/null || true
+cp -f "$MODDIR/lib/crypto.sh"   "$MODDIR/webroot/" 2>/dev/null || true
+cp -f "$MODDIR/lib/account.sh"  "$MODDIR/webroot/" 2>/dev/null || true
+cp -f "$MODDIR/lib/detect.sh"   "$MODDIR/webroot/" 2>/dev/null || true
+cp -f "$MODDIR/lib/switch.sh"   "$MODDIR/webroot/" 2>/dev/null || true
+cp -f "$MODDIR/lib/ai.sh"       "$MODDIR/webroot/" 2>/dev/null || true
+
+# 安装后立即启动后台服务，无需重启
+if command -v busybox >/dev/null 2>&1; then
+    pkill -f "busybox httpd.*8848" 2>/dev/null
+    sleep 1
+    busybox httpd -f -p 8848 -h "$MODDIR/webroot" -c "$MODDIR/webroot/api.sh" \
+        >> "$DATA_DIR/logs/httpd.log" 2>&1 &
+    ui_print "- Web UI 已启动: http://127.0.0.1:8848"
+else
+    ui_print "- 未检测到 busybox, Web UI 需重启后生效"
+fi
+
 exit 0

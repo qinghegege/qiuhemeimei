@@ -1,6 +1,6 @@
 id=qinghe
 name=腾讯手游账号切换器(清荷)
-version=v1.0.1
-versionCode=2
+version=v1.0.2
+versionCode=3
 author=qiuhemeimei
 description=手机端腾讯游戏账号本地快速切换工具，支持王者荣耀、和平精英、CF手游等多款腾讯手游。集成 DeepSeek AI 自然语言管理。安装后终端输入 qh 即可使用。
