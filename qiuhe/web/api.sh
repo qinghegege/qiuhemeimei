@@ -75,6 +75,13 @@ fi
 check_root
 detect_env 2>/dev/null
 
+# SELinux 诊断
+_selinux_status="$(getenforce 2>/dev/null || echo 'unknown')"
+if [ "$_selinux_status" = "Enforcing" ]; then
+    echo "[WARN] SELinux 处于 Enforcing 模式, 可能阻止读取游戏数据目录" >&2
+    echo "[INFO] 如备份失败, 可尝试在终端执行: setenforce 0 临时关闭" >&2
+fi
+
 # --- 路由 ---
 case "$_action" in
     detect)
@@ -106,20 +113,33 @@ case "$_action" in
     backup)
         _g="$(getp game ""); _a="$(getp alias ""); _p="$(getp path "")"
         [ -z "$_g" ] || [ -z "$_a" ] && { respond_err "需要 game 和 alias"; exit 1; }
-        account_backup "$_g" "$_a" "$_p" >/dev/null 2>&1 && respond "{\"ok\":true,\"alias\":\"$_a\"}" || respond_err "备份失败"
+        _elog="/tmp/qh_bak_$$"
+        account_backup "$_g" "$_a" "$_p" >"$_elog" 2>&1; _rc=$?
+        if [ $_rc -eq 0 ]; then rm -f "$_elog"; respond "{\"ok\":true,\"alias\":\"$_a\"}"
+        else _tl=$(tail -2 "$_elog" 2>/dev/null | tr '\n' '|' | sed 's/"/\\"/g'); rm -f "$_elog"; respond_err "${_tl:-备份失败}"
+        fi
         ;;
     restore)
         _a="$(getp alias "")"
         [ -z "$_a" ] && { respond_err "需要 alias"; exit 1; }
-        switch_account "$_a" >/dev/null 2>&1 && respond "{\"ok\":true,\"alias\":\"$_a\"}" || respond_err "切换失败"
+        _elog="/tmp/qh_res_$$"
+        switch_account "$_a" >"$_elog" 2>&1; _rc=$?
+        if [ $_rc -eq 0 ]; then rm -f "$_elog"; respond "{\"ok\":true,\"alias\":\"$_a\"}"
+        else _tl=$(tail -2 "$_elog" 2>/dev/null | tr '\n' '|' | sed 's/"/\\"/g'); rm -f "$_elog"; respond_err "${_tl:-切换失败}"
+        fi
         ;;
     delete)
         _a="$(getp alias "")"
         [ -z "$_a" ] && { respond_err "需要 alias"; exit 1; }
-        account_delete "$_a" 1 >/dev/null 2>&1 && respond "{\"ok\":true,\"alias\":\"$_a\"}" || respond_err "删除失败"
+        _elog="/tmp/qh_del_$$"
+        account_delete "$_a" 1 >"$_elog" 2>&1; _rc=$?
+        if [ $_rc -eq 0 ]; then rm -f "$_elog"; respond "{\"ok\":true,\"alias\":\"$_a\"}"
+        else _tl=$(tail -2 "$_elog" 2>/dev/null | tr '\n' '|' | sed 's/"/\\"/g'); rm -f "$_elog"; respond_err "${_tl:-删除失败}"
+        fi
         ;;
     status)
-        respond "{\"ok\":true,\"version\":\"v2.1.3\",\"dataDir\":\"$DATA_DIR\"}"
+        _se="$(getenforce 2>/dev/null || echo 'unknown')"
+        respond "{\"ok\":true,\"version\":\"v2.1.4\",\"dataDir\":\"$DATA_DIR\",\"selinux\":\"$_se\"}"
         ;;
     *)  respond_err "未知接口: $_action" ;;
 esac

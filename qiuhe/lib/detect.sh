@@ -65,7 +65,7 @@ detect_all_entries() {
     while IFS='|' read -r _name _pkg _path _subdirs; do
         [ -z "$_name" ] && continue
         _display="$(get_display_name "$_name")"
-        if [ -d "$_path" ]; then
+        if [ -d "$_path" ] && [ -r "$_path" ]; then
             _entry="{\"name\":\"$_name\",\"display\":\"$_display\",\"pkg\":\"$_pkg\",\"path\":\"$_path\",\"installed\":true,\"size\":\"—\",\"clone\":false}"
             [ -n "$_entries" ] && _entries="$_entries,"
             _entries="${_entries}${_entry}"
@@ -83,7 +83,7 @@ detect_game_paths() {
 
     _paths="{\"name\":\"$_name\",\"display\":\"$_display\",\"pkg\":\"$_pkg\","
     _has_main="false"
-    [ -d "$_main" ] && _has_main="true"
+    [ -d "$_main" ] && [ -r "$_main" ] && _has_main="true"
     _paths="${_paths}\"main\":{\"exists\":$_has_main,\"path\":\"$_main\"}"
 
     _clones=""
@@ -93,7 +93,7 @@ detect_game_paths() {
             _uid="$(basename "$_d")"
             [ "$_uid" = "0" ] && continue
             _cp="${_d}${_pkg}"
-            if [ -d "$_cp" ]; then
+            if [ -d "$_cp" ] && [ -r "$_cp" ]; then
                 [ -n "$_clones" ] && _clones="$_clones,"
                 _clones="${_clones}{\"uid\":\"$_uid\",\"path\":\"$_cp\"}"
             fi

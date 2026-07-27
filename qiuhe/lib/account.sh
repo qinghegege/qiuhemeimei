@@ -50,6 +50,11 @@ account_backup() {
         log_err "游戏数据目录不存在: $_game_data"
         return 1
     fi
+    if [ ! -r "$_game_data" ]; then
+        log_err "无权限读取数据目录: $_game_data"
+        log_info "请检查 SELinux 状态 (getenforce) 或确认 KSU 授权正常"
+        return 1
+    fi
 
     # 检测游戏进程
     if [ "$HAS_PGREP" = true ]; then
@@ -82,10 +87,13 @@ account_backup() {
     check_disk_space "$_acct_dir" 100 || return 1
 
     # 完整备份: tar 打包所有数据 (排除 cache/code_cache/lib)
-    if (cd "$_game_data" && tar cf - --exclude='./cache' --exclude='./code_cache' --exclude='./lib' . 2>/dev/null) | (cd "$_data_dir" && tar xf - 2>/dev/null); then
-        :
+    _tar_err="/tmp/qh_backup_err_$$"
+    if (cd "$_game_data" && tar cf - --exclude='./cache' --exclude='./code_cache' --exclude='./lib' . 2>"$_tar_err") | (cd "$_data_dir" && tar xf - 2>>"$_tar_err"); then
+        rm -f "$_tar_err"
     else
-        log_err "备份失败"
+        _err_msg="$(head -3 "$_tar_err" 2>/dev/null)"
+        rm -f "$_tar_err"
+        log_err "备份失败: ${_err_msg:-未知错误}"
         rm -rf "$_acct_dir"
         return 1
     fi
